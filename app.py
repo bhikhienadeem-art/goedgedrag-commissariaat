@@ -24,106 +24,102 @@ st.set_page_config(
     layout="wide"
 )
 
-# Forceer witte achtergrond en strakke overheidsstijl
+# Krachtige CSS om een frisse, professionele groen-witte overheidsstijl af te dwingen
 st.markdown("""
 <style>
-    /* Force Light Theme Base */
-    .stApp, [data-testid="stAppViewContainer"] {
+    /* Forceer lichte achtergrond en donkere tekst */
+    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
         background-color: #f8fafc !important;
-        color: #0f172a !important;
+        color: #1e293b !important;
     }
     
-    /* Top Bar */
-    .top-bar {
+    /* Top Header Bar */
+    .top-gov-bar {
         background-color: #0d5c3a;
         color: white;
-        padding: 10px 24px;
-        font-size: 0.88rem;
+        padding: 12px 24px;
+        font-size: 0.9rem;
+        font-weight: 500;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-radius: 6px;
-        margin-bottom: 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
-    /* Main Container */
-    .main-card {
+    /* Hoofdtitel */
+    .gov-title {
+        color: #0d5c3a;
+        font-weight: 800;
+        font-size: 2rem;
+        margin-bottom: 0px;
+    }
+    
+    /* Vragen / Kaarten Container */
+    .form-container {
         background-color: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 30px;
+        border-radius: 12px;
+        padding: 35px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         margin-bottom: 30px;
     }
     
-    .brand-title {
-        color: #0d5c3a;
-        font-weight: 800;
-        font-size: 1.8rem;
-        margin: 0;
+    /* Labels leesbaar maken */
+    label, p, span, div {
+        color: #1e293b;
     }
     
-    /* Document Cards */
-    .doc-box {
-        background-color: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 10px;
-        min-height: 110px;
+    /* Invoervelden strakker maken */
+    .stTextInput input {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        border-radius: 8px !important;
     }
     
-    .doc-icon {
-        background-color: #d1fae5;
-        color: #0d5c3a;
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-        margin-bottom: 8px;
-    }
-
-    /* Groene Verzendknop */
+    /* Professionele Groene Verzendknop */
     div.stButton > button:first-child {
         background-color: #0d5c3a !important;
         color: #ffffff !important;
         border-radius: 8px !important;
-        padding: 12px 28px !important;
-        font-size: 1rem !important;
+        padding: 12px 24px !important;
+        font-size: 1.05rem !important;
         font-weight: 700 !important;
         border: none !important;
         width: 100% !important;
+        box-shadow: 0 4px 6px rgba(13, 92, 58, 0.2);
     }
     div.stButton > button:first-child:hover {
         background-color: #15803d !important;
     }
     
-    /* Footer Styling */
-    .footer-container {
+    /* Footer Stijl */
+    .gov-footer {
         background-color: #053823;
         color: #ffffff;
-        padding: 35px 40px;
-        border-radius: 16px;
-        margin-top: 40px;
+        padding: 40px;
+        border-radius: 12px;
+        margin-top: 50px;
     }
-    .footer-header {
+    .footer-heading {
         font-weight: 700;
-        font-size: 1rem;
-        margin-bottom: 12px;
         color: #ffffff;
+        font-size: 1.05rem;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #0d5c3a;
+        padding-bottom: 6px;
     }
-    .footer-text {
+    .footer-content {
         color: #cbd5e1;
-        font-size: 0.88rem;
-        margin-bottom: 6px;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Appwrite Client
+# Appwrite Client initialiseren
 @st.cache_resource
 def get_appwrite_clients():
     client = Client()
@@ -137,99 +133,68 @@ def generate_aanvraagnummer():
     suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
     return f"VGG-WAN-2026-{suffix}"
 
-# 🏛️ Bovenbalk
+# 🏛️ Officiële Overheidsbalk bovenaan
 st.markdown("""
-<div class="top-bar">
+<div class="top-gov-bar">
     <div>🏛️ <b>Officieel Aanvraagportaal Verklaring van Goed Gedrag (VGG)</b></div>
     <div>📍 Tawajarieweg no.20 &nbsp;|&nbsp; 📞 366660 / 3666929 / 3666944</div>
 </div>
 """, unsafe_allow_html=True)
 
-# Header met Navigatie
-col_brand, col_nav = st.columns([2, 1])
-with col_brand:
-    st.markdown("<h1 class='brand-title'>🏛️ Commissariaat Wanica Centrum</h1>", unsafe_allow_html=True)
+# Branding & Navigatie Tabs
+col_logo, col_menu = st.columns([2, 1])
+with col_logo:
+    st.markdown("<h1 class='gov-title'>Commissariaat Wanica Centrum</h1>", unsafe_allow_html=True)
+    st.caption("District Commissariaat Wanica — Digitale Loketdiensten")
 
-with col_nav:
-    tab_choice = st.radio("", ["📝 Online Aanvraag (Cliënten)", "🔐 Medewerkers Portaal"], horizontal=True)
+with col_menu:
+    tab_choice = st.radio("Navigatie", ["📝 Online Aanvraag (Cliënten)", "🔐 Medewerkers Portaal"], horizontal=True, label_visibility="collapsed")
 
 st.divider()
 
 # ---------------------------------------------------------
-# TAB 1: ONLINE AANVRAAG
+# TAB 1: ONLINE AANVRAAG VOOR BURGERS / CLIËNTEN
 # ---------------------------------------------------------
 if tab_choice == "📝 Online Aanvraag (Cliënten)":
     st.markdown("""
-    <div class="main-card">
-        <h2 style='color:#0d5c3a; margin-top:0;'>🟢 Aanvraag Verklaring van Goed Gedrag (VGG)</h2>
-        <p style='color:#475569;'>Vul onderstaande gegevens nauwkeurig in en voeg uw documenten toe om uw aanvraag in te dienen bij het Commissariaat Wanica Centrum.</p>
+    <div class="form-container">
+        <h2 style='color:#0d5c3a; margin-top:0;'>Aanvraag Verklaring van Goed Gedrag (VGG)</h2>
+        <p style='color:#64748b;'>Vul onderstaande velden nauwkeurig in en upload de vereiste documenten om uw aanvraag in te dienen.</p>
     </div>
     """, unsafe_allow_html=True)
     
-    with st.form("vgg_client_form", clear_on_submit=True):
-        col_f1, col_f2 = st.columns(2)
-        with col_f1:
-            volledige_naam = st.text_input("VOLLEDIGE NAAM *", placeholder="bijv. Jan van Sichem")
-        with col_f2:
-            emailadres = st.text_input("E-MAILADRES *", placeholder="naam@voorbeeld.com")
+    with st.form("client_vgg_submission", clear_on_submit=True):
+        col1, col2 = st.columns(2)
+        with col1:
+            volledige_naam = st.text_input("VOLLEDIGE NAAM *", placeholder="Volgens CBB uittreksel")
+        with col2:
+            emailadres = st.text_input("E-MAILADRES *", placeholder="jouw@email.com")
             
         st.markdown("<br><b>VEREISTE DOCUMENTEN (3 BESTANDEN)</b>", unsafe_allow_html=True)
         
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.markdown("""
-            <div class="doc-box">
-                <div class="doc-icon">🪪</div>
-                <b>1. Uittreksel CBB *</b><br>
-                <small style='color:#64748b;'>PDF of Afbeelding (Max 5MB)</small>
-            </div>
-            """, unsafe_allow_html=True)
-            uittreksel_file = st.file_uploader("", type=['pdf', 'jpg', 'jpeg', 'png'], key="uittreksel")
-            
-        with c2:
-            st.markdown("""
-            <div class="doc-box">
-                <div class="doc-icon">👤</div>
-                <b>2. Pasfoto *</b><br>
-                <small style='color:#64748b;'>Recente pasfoto (JPG/PNG)</small>
-            </div>
-            """, unsafe_allow_html=True)
-            pasfoto_file = st.file_uploader("", type=['jpg', 'jpeg', 'png'], key="pasfoto")
-            
-        with c3:
-            st.markdown("""
-            <div class="doc-box">
-                <div class="doc-icon">🧾</div>
-                <b>3. Bankbewijs *</b><br>
-                <small style='color:#64748b;'>Leges overschrijving (PDF/JPG)</small>
-            </div>
-            """, unsafe_allow_html=True)
-            bankbewijs_file = st.file_uploader("", type=['pdf', 'jpg', 'jpeg', 'png'], key="bankbewijs")
+        c_u, c_p, c_b = st.columns(3)
+        with c_u:
+            st.info("🪪 **1. Uittreksel CBB**\n\n(PDF of Afbeelding, max 5MB)")
+            uittreksel_file = st.file_uploader("Upload uittreksel", type=['pdf', 'jpg', 'jpeg', 'png'], key="uit")
+        with c_p:
+            st.info("👤 **2. Pasfoto**\n\n(Recente pasfoto, JPG/PNG)")
+            pasfoto_file = st.file_uploader("Upload pasfoto", type=['jpg', 'jpeg', 'png'], key="pas")
+        with c_b:
+            st.info("🧾 **3. Bankbewijs**\n\n(Leges overschrijving, PDF/JPG)")
+            bankbewijs_file = st.file_uploader("Upload bankbewijs", type=['pdf', 'jpg', 'jpeg', 'png'], key="ban")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        submit_btn = st.form_submit_button("✈️ Aanvraag Verzenden")
+        submit_clicked = st.form_submit_button("✈️ Aanvraag Veilig Verzenden")
         
-        if submit_btn:
+        if submit_clicked:
             if not volledige_naam or not emailadres or not uittreksel_file or not pasfoto_file or not bankbewijs_file:
-                st.error("Vul alstublieft alle verplichte velden in en voeg alle 3 documenten toe.")
+                st.error("⚠️ Vul alstublieft alle velden in en zorg dat alle 3 de documenten zijn geüpload.")
             else:
                 try:
-                    with st.spinner("Documenten uploaden naar Appwrite..."):
-                        u_res = storage.create_file(
-                            bucket_id=APPWRITE_BUCKET_ID,
-                            file_id='unique()',
-                            file=InputFile.from_bytes(uittreksel_file.read(), filename=uittreksel_file.name)
-                        )
-                        p_res = storage.create_file(
-                            bucket_id=APPWRITE_BUCKET_ID,
-                            file_id='unique()',
-                            file=InputFile.from_bytes(pasfoto_file.read(), filename=pasfoto_file.name)
-                        )
-                        b_res = storage.create_file(
-                            bucket_id=APPWRITE_BUCKET_ID,
-                            file_id='unique()',
-                            file=InputFile.from_bytes(bankbewijs_file.read(), filename=bankbewijs_file.name)
-                        )
+                    with st.spinner("Bezig met uploaden en registreren in Appwrite..."):
+                        u_res = storage.create_file(APPWRITE_BUCKET_ID, 'unique()', InputFile.from_bytes(uittreksel_file.read(), filename=uittreksel_file.name))
+                        p_res = storage.create_file(APPWRITE_BUCKET_ID, 'unique()', InputFile.from_bytes(pasfoto_file.read(), filename=pasfoto_file.name))
+                        b_res = storage.create_file(APPWRITE_BUCKET_ID, 'unique()', InputFile.from_bytes(bankbewijs_file.read(), filename=bankbewijs_file.name))
 
                         aanvraagnummer = generate_aanvraagnummer()
                         databases.create_document(
@@ -247,13 +212,13 @@ if tab_choice == "📝 Online Aanvraag (Cliënten)":
                             }
                         )
 
-                        st.success("✅ Uw aanvraag is succesvol geregistreerd!")
-                        st.info(f"**Uw Aanvraagnummer:** `{aanvraagnummer}`")
+                        st.success("✅ Uw aanvraag is succesvol ingediend bij het Commissariaat!")
+                        st.info(f"**Uw unieke aanvraagnummer is:** `{aanvraagnummer}`\n\nBewaar dit nummer goed om uw status te kunnen volgen.")
                 except Exception as e:
-                    st.error(f"Fout bij opslaan: {str(e)}")
+                    st.error(f"Fout bij indienen van de aanvraag: {str(e)}")
 
 # ---------------------------------------------------------
-# TAB 2: MEDEWERKERS PORTAAL
+# TAB 2: MEDEWERKERS BEHEERPORTAAL
 # ---------------------------------------------------------
 else:
     st.markdown("### 🔐 Medewerkers Beheerdersportaal")
@@ -261,10 +226,10 @@ else:
         st.session_state['logged_in'] = False
 
     if not st.session_state['logged_in']:
-        with st.form("login_form"):
-            email = st.text_input("E-mailadres")
+        with st.form("staff_login"):
+            email = st.text_input("Medewerker E-mailadres")
             password = st.text_input("Wachtwoord", type="password")
-            login_btn = st.form_submit_button("Inloggen")
+            login_btn = st.form_submit_button("Inloggen op Portaal")
 
             if login_btn:
                 try:
@@ -273,51 +238,43 @@ else:
                     st.success("Succesvol ingelogd!")
                     st.rerun()
                 except Exception:
-                    st.error("Inloggen mislukt. Controleer uw e-mailadres en wachtwoord.")
+                    st.error("Inloggen mislukt. Controleer uw inloggegevens.")
     else:
         if st.button("Uitloggen"):
             st.session_state['logged_in'] = False
             st.rerun()
 
-        st.subheader("📋 Binnengekomen Aanvragen (Appwrite Database)")
+        st.subheader("📋 Binnengekomen Aanvragen in Appwrite")
         try:
-            docs = databases.list_documents(
-                database_id=APPWRITE_DB_ID,
-                collection_id=APPWRITE_COLLECTION_ID
-            ).get('documents', [])
+            docs = databases.list_documents(APPWRITE_DB_ID, APPWRITE_COLLECTION_ID).get('documents', [])
 
             if not docs:
-                st.info("Geen aanvragen gevonden.")
+                st.info("Er zijn momenteel geen aanvragen in het systeem.")
             else:
                 for doc in docs:
-                    with st.expander(f"📌 {doc.get('aanvraagnummer')} — {doc.get('client_naam')} ({doc.get('status').upper()})"):
-                        st.write(f"**E-mail:** {doc.get('client_email')}")
+                    with st.expander(f"📌 {doc.get('aanvraagnummer')} — {doc.get('client_naam')} (Status: {doc.get('status').upper()})"):
+                        st.write(f"**E-mailadres:** {doc.get('client_email')}")
                         
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
+                        col_1, col_2, col_3 = st.columns(3)
+                        with col_1:
                             u_url = f"{APPWRITE_ENDPOINT}/storage/buckets/{APPWRITE_BUCKET_ID}/files/{doc.get('uittreksel_file_id')}/view?project={APPWRITE_PROJECT_ID}"
                             st.link_button("Bekijk Uittreksel", u_url)
-                        with col2:
+                        with col_2:
                             p_url = f"{APPWRITE_ENDPOINT}/storage/buckets/{APPWRITE_BUCKET_ID}/files/{doc.get('pasfoto_file_id')}/view?project={APPWRITE_PROJECT_ID}"
                             st.link_button("Bekijk Pasfoto", p_url)
-                        with col3:
+                        with col_3:
                             b_url = f"{APPWRITE_ENDPOINT}/storage/buckets/{APPWRITE_BUCKET_ID}/files/{doc.get('bankbewijs_file_id')}/view?project={APPWRITE_PROJECT_ID}"
                             st.link_button("Bekijk Bankbewijs", b_url)
 
                         new_status = st.selectbox(
-                            "Status wijzigen",
+                            "Status bijwerken",
                             ["ingediend", "in_behandeling", "goedgekeurd", "afgewezen"],
                             index=["ingediend", "in_behandeling", "goedgekeurd", "afgewezen"].index(doc.get('status', 'ingediend')),
-                            key=doc['$id']
+                            key=f"status_{doc['$id']}"
                         )
-                        if st.button("Status Opslaan", key=f"btn_{doc['$id']}"):
-                            databases.update_document(
-                                database_id=APPWRITE_DB_ID,
-                                collection_id=APPWRITE_COLLECTION_ID,
-                                document_id=doc['$id'],
-                                data={'status': new_status}
-                            )
-                            st.success("Status bijgewerkt!")
+                        if st.button("Status Opslaan", key=f"save_{doc['$id']}"):
+                            databases.update_document(APPWRITE_DB_ID, APPWRITE_COLLECTION_ID, doc['$id'], {'status': new_status})
+                            st.success("Status met succes bijgewerkt!")
                             st.rerun()
         except Exception as e:
             st.error(f"Fout bij ophalen van gegevens: {str(e)}")
@@ -326,22 +283,22 @@ else:
 # FOOTER
 # ---------------------------------------------------------
 st.markdown("""
-<div class="footer-container">
-    <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 250px; margin-bottom: 20px;">
-            <div class="footer-header">🏛️ Commissariaat Wanica Centrum</div>
-            <div class="footer-text">Officiële digitale dienstverlening voor burgers in het district Wanica Centrum.</div>
+<div class="gov-footer">
+    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+        <div style="flex: 1; min-width: 250px;">
+            <div class="footer-heading">🏛️ Commissariaat Wanica Centrum</div>
+            <div class="footer-content">Officiële digitale dienstverlening voor burgers in het district Wanica Centrum.</div>
         </div>
-        <div style="flex: 1; min-width: 250px; margin-bottom: 20px;">
-            <div class="footer-header">ADRES & CONTACT</div>
-            <div class="footer-text">📍 Tawajarieweg no.20, Wanica, Suriname</div>
-            <div class="footer-text">📞 366660 / 3666929 / 3666944</div>
+        <div style="flex: 1; min-width: 250px;">
+            <div class="footer-heading">ADRES & CONTACT</div>
+            <div class="footer-content">📍 Tawajarieweg no.20, Wanica, Suriname</div>
+            <div class="footer-content">📞 366660 / 3666929 / 3666944</div>
         </div>
-        <div style="flex: 1; min-width: 250px; margin-bottom: 20px;">
-            <div class="footer-header">OPENINGSTIJDEN</div>
-            <div class="footer-text">Maandag - Donderdag: 07:00 - 15:00 uur</div>
-            <div class="footer-text">Vrijdag: 07:00 - 14:30 uur</div>
-            <div class="footer-text">Zaterdag & Zondag: Gesloten</div>
+        <div style="flex: 1; min-width: 250px;">
+            <div class="footer-heading">OPENINGSTIJDEN</div>
+            <div class="footer-content">Maandag - Donderdag: 07:00 - 15:00 uur</div>
+            <div class="footer-content">Vrijdag: 07:00 - 14:30 uur</div>
+            <div class="footer-content">Zaterdag & Zondag: Gesloten</div>
         </div>
     </div>
 </div>
