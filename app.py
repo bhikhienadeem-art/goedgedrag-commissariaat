@@ -1,168 +1,141 @@
-import os, requests
+import os
 import streamlit as st
 from dotenv import load_dotenv
-from supabase import create_client
+from appwrite.client import Client
+from appwrite.services.databases import Databases
+from appwrite.services.storage import Storage
+from appwrite.services.account import Account
 
 load_dotenv()
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
-DOWNLOAD_API_URL = os.getenv("DOWNLOAD_API_URL", "http://127.0.0.1:8001")
 
-st.set_page_config(page_title="Goedgedrag | Commissariaat Wanica Centrum", layout="wide")
-st.title("Goedgedrag – Medewerkersdashboard")
-st.caption("Commissariaat Wanica Centrum")
+# Appwrite Configuratie
+APPWRITE_ENDPOINT = os.getenv("APPWRITE_ENDPOINT", "https://fra.cloud.appwrite.io/v1")
+APPWRITE_PROJECT_ID = os.getenv("APPWRITE_PROJECT_ID", "6adb474d000b3faf4ab8")
+APPWRITE_DB_ID = os.getenv("APPWRITE_DB_ID", "6adb48b70023ab8bd572")
+APPWRITE_COLLECTION_ID = os.getenv("APPWRITE_COLLECTION_ID", "aanvragen")
+APPWRITE_BUCKET_ID = os.getenv("APPWRITE_BUCKET_ID", "documenten")
 
-if not SUPABASE_URL or not SUPABASE_ANON_KEY:
-    st.error("Vul SUPABASE_URL en SUPABASE_ANON_KEY in het .env-bestand in.")
-    st.stop()
+st.set_page_config(
+    page_title="Goedgedrag | Commissariaat Wanica Centrum",
+    layout="wide"
+)
+
+# Groen-witte overheidsstijl
+st.markdown("""
+<style>
+    .main-header {
+        background-color: #0d5c3a;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .main-header h1, .main-header p {
+        color: white !important;
+    }
+</style>
+<div class="main-header">
+    <h1>Commissariaat Wanica Centrum</h1>
+    <p>Verklaring van Goed Gedrag (VGG) — Medewerkersdashboard</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Appwrite Client
+@st.cache_resource
+def get_appwrite_clients():
+    client = Client()
+    client.set_endpoint(APPWRITE_ENDPOINT)
+    client.set_project(APPWRITE_PROJECT_ID)
+    return client, Databases(client), Storage(client), Account(client)
+
+client, databases, storage, account = get_appwrite_clients()
 
 if "session" not in st.session_state:
     st.session_state.session = None
-if "supabase" not in st.session_state:
-    st.session_state.supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-client = st.session_state.supabase
 
+# Medewerker Login via Appwrite Auth
 if not st.session_state.session:
-    st.subheader("Medewerker login")
+    st.subheader("Medewerker Inloggen")
     email = st.text_input("E-mailadres")
     password = st.text_input("Wachtwoord", type="password")
+    
     if st.button("Inloggen", type="primary"):
         try:
-            result = client.auth.sign_in_with_password({"email": email, "password": password})
-            st.session_state.session = result.session
+            session = account.create_email_password_session(email, password)
+            st.session_state.session = session
+            st.success("Succesvol ingelogd!")
             st.rerun()
-        except Exception:
-            st.error("Inloggen mislukt. Controleer uw gegevens of neem contact op met de beheerder.")
-    st.info("Medewerkersaccounts moeten vooraf door een beheerder worden aangemaakt.")
+        except Exception as e:
+            st.error("Inloggen mislukt. Controleer uw e-mailadres en wachtwoord.")
     st.stop()
 
-session = st.session_state.session
-access_token = session.access_token
-user_id = session.user.id
-
-try:
-    profile = client.table("profiles").select("display_name,role").eq("id", user_id).single().execute().data
-except Exception:
-    profile = None
-if not profile or profile.get("role") not in ("staff", "admin"):
-    st.error("Uw account heeft geen bevoegde medewerkersrol.")
-    if st.button("Uitloggen"):
-        client.auth.sign_out()
-        st.session_state.session = None
-        st.rerun()
-    st.stop()
-
-st.write(f"Ingelogd als **{profile.get('display_name') or session.user.email}**")
 if st.button("Uitloggen"):
-    client.auth.sign_out()
+    try:
+        account.delete_session('current')
+    except Exception:
+        pass
     st.session_state.session = None
     st.rerun()
 
 st.divider()
-st.subheader("Aanvragen")
+st.subheader("Binnengekomen Aanvragen")
+
 try:
-    applications = client.table("applications").select(
-        "id,application_number,full_name,email,phone,status,created_at"
-    ).order("created_at", desc=True).limit(200).execute().data or []
-except Exception:
+    response = databases.list_documents(
+        database_id=APPWRITE_DB_ID,
+        collection_id=APPWRITE_COLLECTION_ID
+    )
+    applications = response.get("documents", [])
+except Exception as e:
+    st.error(f"Fout bij het ophalen van aanvragen uit Appwrite: {e}")
     applications = []
 
 if not applications:
-    st.info("Er zijn nog geen aanvragen, of de database is nog niet ingericht.")
+    st.info("Er zijn momenteel geen aanvragen gevonden in de Appwrite database.")
     st.stop()
 
-for application in applications:
-    shown_number = application.get("application_number") or "Nog niet genummerd"
-    with st.expander(f"{shown_number} — {application['full_name']} — {application['status']}"):
-        st.write(f"E-mail: {application.get('email') or '—'}")
-        if not application.get("application_number"):
-            st.info("Deze aanvraag heeft nog geen officieel aanvraagnummer.")
-            with st.form(key=f"receipt_form_{application['id']}"):
-                manual_number = st.text_input(
-                    "Officieel aanvraagnummer (handmatig invoeren)",
-                    key=f"manual_number_{application['id']}",
-                    placeholder="Bijv. GG/2026/015"
-                )
-                confirm_receipt = st.form_submit_button("Ontvangst registreren")
-            if confirm_receipt:
-                cleaned_number = manual_number.strip()
-                if not cleaned_number:
-                    st.error("Vul eerst het aanvraagnummer in.")
-                else:
-                    try:
-                        existing = client.table("applications").select("id").eq(
-                            "application_number", cleaned_number
-                        ).execute().data or []
-                        if existing:
-                            st.error("Dit aanvraagnummer is al in gebruik. Controleer het nummer.")
-                        else:
-                            client.table("applications").update({
-                                "application_number": cleaned_number,
-                                "received_at": __import__("datetime").datetime.now(
-                                    __import__("datetime").timezone.utc
-                                ).isoformat(),
-                                "received_by": user_id,
-                                "status": "Stukken controleren"
-                            }).eq("id", application["id"]).execute()
-                            client.table("audit_log").insert({
-                                "actor_user_id": user_id,
-                                "application_id": application["id"],
-                                "action": "receipt_registered",
-                                "outcome": "success",
-                                "details": {"application_number": cleaned_number}
-                            }).execute()
-                            st.success("Ontvangst en aanvraagnummer geregistreerd.")
-                            st.rerun()
-                    except Exception:
-                        st.error("Ontvangst kon niet worden geregistreerd. Controleer databasebeleid.")
-        else:
-            st.write(f"Officieel aanvraagnummer: **{application['application_number']}**")
-            st.write(f"Ontvangen op: {application.get('received_at') or '—'}")
-        st.write(f"Telefoon: {application.get('phone') or '—'}")
-        st.write(f"Aangemaakt: {application.get('created_at') or '—'}")
-        statuses = ["Nieuw", "Stukken controleren", "In behandeling", "Afgegeven"]
-        new_status = st.selectbox("Status", statuses, index=statuses.index(application["status"]), key=f"status_{application['id']}")
-        if st.button("Status opslaan", key=f"save_{application['id']}"):
-            try:
-                client.table("applications").update({"status": new_status}).eq("id", application["id"]).execute()
-                client.table("audit_log").insert({
-                    "actor_user_id": user_id, "application_id": application["id"],
-                    "action": "status_changed", "outcome": "success",
-                    "details": {"new_status": new_status}
-                }).execute()
-                st.success("Status bijgewerkt.")
-                st.rerun()
-            except Exception:
-                st.error("Status kon niet worden bijgewerkt. Controleer databasebeleid en rechten.")
+for app_doc in applications:
+    app_id = app_doc.get("$id")
+    aanvraagnummer = app_doc.get("aanvraagnummer", "Geen nummer")
+    client_naam = app_doc.get("client_naam", "Onbekend")
+    status = app_doc.get("status", "ingediend")
 
-        docs = client.table("application_documents").select(
-            "id,document_type,original_filename,uploaded_at,downloaded_at,deleted_at,download_status"
-        ).eq("application_id", application["id"]).order("uploaded_at").execute().data or []
-        st.markdown("**Documenten**")
-        for doc in docs:
-            cols = st.columns([3, 2, 2])
-            cols[0].write(f"{doc['document_type']}: {doc['original_filename']}")
-            cols[1].write(doc["download_status"])
-            if doc["download_status"] == "available":
-                if cols[2].button("Downloadlink maken", key=f"prepare_{doc['id']}"):
-                    try:
-                        result = requests.post(
-                            f"{DOWNLOAD_API_URL.rstrip('/')}/prepare-download",
-                            json={"document_id": doc["id"]},
-                            headers={"Authorization": f"Bearer {access_token}"},
-                            timeout=20
-                        )
-                        if result.ok:
-                            link = result.json()["download_url"]
-                            st.link_button("Download document (eenmalige link)", link)
-                            st.warning(
-                                "Na openen van deze link wordt het bestand via de download-API verzonden. "
-                                "Daarna probeert de server het bestand uit Supabase Storage te verwijderen. "
-                                "Dit bewijst niet dat het bestand lokaal is opgeslagen."
-                            )
-                        else:
-                            st.error("Downloadlink kon niet worden gemaakt; het bestand is niet verwijderd.")
-                    except Exception:
-                        st.error("Downloadlink kon niet worden gemaakt; het bestand is niet verwijderd.")
-            elif doc["download_status"] == "deleted":
-                cols[2].write("Verwijderd")
+    with st.expander(f"📌 {aanvraagnummer} — {client_naam} ({status.upper()})"):
+        st.write(f"**E-mailadres:** {app_doc.get('client_email', '—')}")
+        st.write(f"**Huidige Status:** `{status}`")
+
+        statuses = ["ingediend", "in_behandeling", "goedgekeurd", "afgewezen"]
+        current_index = statuses.index(status) if status in statuses else 0
+        new_status = st.selectbox("Status wijzigen", statuses, index=current_index, key=f"status_{app_id}")
+        
+        if st.button("Status opslaan", key=f"save_{app_id}"):
+            try:
+                databases.update_document(
+                    database_id=APPWRITE_DB_ID,
+                    collection_id=APPWRITE_COLLECTION_ID,
+                    document_id=app_id,
+                    data={"status": new_status}
+                )
+                st.success("Status succesvol bijgewerkt in Appwrite!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Kon status niet bijwerken: {e}")
+
+        st.markdown("---")
+        st.markdown("**Gekoppelde Documenten:**")
+
+        file_keys = [
+            ("Uittreksel", app_doc.get("uittreksel_file_id")),
+            ("Pasfoto", app_doc.get("pasfoto_file_id")),
+            ("Bankbewijs", app_doc.get("bankbewijs_file_id"))
+        ]
+
+        col1, col2, col3 = st.columns(3)
+        for i, (doc_label, file_id) in enumerate(file_keys):
+            col = [col1, col2, col3][i]
+            if file_id:
+                file_url = f"{APPWRITE_ENDPOINT}/storage/buckets/{APPWRITE_BUCKET_ID}/files/{file_id}/view?project={APPWRITE_PROJECT_ID}"
+                col.markdown(f"**{doc_label}:**")
+                col.link_button(f"Bekijk {doc_label}", file_url)
+            else:
+                col.write(f"**{doc_label}:** Niet beschikbaar")
