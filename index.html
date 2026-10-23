@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commissariaat Wanica Centrum | VGG Portaal</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Appwrite Web SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
+</head>
+<body>
+
+    <!-- 🏛️ Top Bar -->
+    <div class="top-bar">
+        <div>🏛️ <b>Officieel Aanvraagportaal Verklaring van Goed Gedrag (VGG)</b></div>
+        <div>📍 Tawajarieweg no.20 &nbsp;|&nbsp; 📞 366660 / 3666929 / 3666944</div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="main-header">
+        <div class="brand">
+            <div class="brand-icon">🏛️</div>
+            <div>
+                <h1 class="brand-title">Commissariaat Wanica Centrum</h1>
+                <p class="brand-sub">District Commissariaat Wanica — Digitale Loketdiensten</p>
+            </div>
+        </div>
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('client-tab')">📝 Online Aanvraag (Cliënten)</button>
+            <button class="tab-btn" onclick="switchTab('staff-tab')">🔐 Medewerkers Portaal</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- TAB 1: CLIËNTEN AANVRAAG -->
+        <section id="client-tab" class="tab-content active">
+            <div class="card">
+                <h2 class="card-title">🟢 Aanvraag Verklaring van Goed Gedrag (VGG)</h2>
+                <p class="card-subtitle">Vul onderstaande gegevens nauwkeurig in en voeg uw documenten toe om uw aanvraag in te dienen bij het Commissariaat Wanica Centrum.</p>
+                
+                <form id="vggForm" onsubmit="submitForm(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>VOLLEDIGE NAAM *</label>
+                            <input type="text" id="volledigeNaam" placeholder="bijv. Jan van Sichem" required>
+                        </div>
+                        <div class="form-group">
+                            <label>E-MAILADRES *</label>
+                            <input type="email" id="emailAdres" placeholder="naam@voorbeeld.com" required>
+                        </div>
+                    </div>
+
+                    <h3 class="section-label">VEREISTE DOCUMENTEN (3 BESTANDEN)</h3>
+                    
+                    <div class="docs-grid">
+                        <div class="doc-card">
+                            <div class="doc-icon">🪪</div>
+                            <h4>1. Uittreksel CBB *</h4>
+                            <p>PDF of Afbeelding (Max 5MB)</p>
+                            <input type="file" id="uittrekselFile" accept=".pdf,.jpg,.jpeg,.png" required>
+                        </div>
+                        <div class="doc-card">
+                            <div class="doc-icon">👤</div>
+                            <h4>2. Pasfoto *</h4>
+                            <p>Recente pasfoto (JPG/PNG)</p>
+                            <input type="file" id="pasfotoFile" accept=".jpg,.jpeg,.png" required>
+                        </div>
+                        <div class="doc-card">
+                            <div class="doc-icon">🧾</div>
+                            <h4>3. Bankbewijs *</h4>
+                            <p>Leges overschrijving (PDF/JPG)</p>
+                            <input type="file" id="bankbewijsFile" accept=".pdf,.jpg,.jpeg,.png" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">✈️ Aanvraag Verzenden</button>
+                </form>
+                <div id="statusMessage" class="message-box"></div>
+            </div>
+        </section>
+
+        <!-- TAB 2: MEDEWERKERS PORTAAL -->
+        <section id="staff-tab" class="tab-content">
+            <div class="card" id="loginCard">
+                <h2 class="card-title">🔐 Medewerker Inloggen</h2>
+                <form id="loginForm" onsubmit="loginStaff(event)">
+                    <div class="form-group">
+                        <label>E-mailadres</label>
+                        <input type="email" id="staffEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Wachtwoord</label>
+                        <input type="password" id="staffPassword" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Inloggen op Portaal</button>
+                </form>
+            </div>
+
+            <div class="card hidden" id="dashboardCard">
+                <div class="dashboard-header">
+                    <h2>📋 Binnengekomen Aanvragen</h2>
+                    <button class="logout-btn" onclick="logoutStaff()">Uitloggen</button>
+                </div>
+                <div id="applicationsList">Laden van aanvragen...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 🏛️ Footer -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div>
+                <h4>🏛️ Commissariaat Wanica Centrum</h4>
+                <p>Officiële digitale dienstverlening voor burgers in het district Wanica Centrum.</p>
+            </div>
+            <div>
+                <h4>ADRES & CONTACT</h4>
+                <p>📍 Tawajarieweg no.20, Wanica, Suriname</p>
+                <p>📞 366660 / 3666929 / 3666944</p>
+            </div>
+            <div>
+                <h4>OPENINGSTIJDEN</h4>
+                <p>Maandag - Donderdag: 07:00 - 15:00 uur</p>
+                <p>Vrijdag: 07:00 - 14:30 uur</p>
+                <p>Zaterdag & Zondag: Gesloten</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
