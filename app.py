@@ -4,6 +4,7 @@ import os
 import hashlib
 import pandas as pd
 import base64
+import urllib.parse
 
 # Page configuration
 st.set_page_config(
@@ -328,13 +329,21 @@ if menu == "Aanvraag Indienen (Burgers)":
     if 'last_submission' in st.session_state:
         sub = st.session_state['last_submission']
         st.success("✅ Uw aanvraag is succesvol ingediend!")
+        
+        # Maak direct een mailto link aan zodat de medewerker of burger direct kan mailen via ggdaanvraag@gmail.com
+        mail_subject = urllib.parse.quote("Bevestiging Aanvraag Verklaring Omtrent het Gedrag - Wanica Centrum")
+        mail_body = urllib.parse.quote(f"Beste {sub['full_name']},\n\nHartelijk dank voor uw aanvraag voor een Verklaring Omtrent het Gedrag bij het Districtscommissariaat Wanica Centrum.\n\nWij hebben uw aanvraag in goede orde ontvangen en in behandeling genomen. Zodra uw aanvraag is beoordeeld, nemen wij contact met u op via dit e-mailadres of via uw telefoonnummer ({sub['phone_number']}).\n\nMet vriendelijke groet,\nDistrictscommissariaat Wanica Centrum")
+        mailto_link = f"mailto:{sub['email']}?subject={mail_subject}&body={mail_body}"
+
         st.markdown(f"""
         <div style="background-color: #ffffff; border: 3px solid #2e7d32; padding: 25px; border-radius: 14px; color: #0f172a; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-            <h3 style="color: #1b5e20; margin-top: 0;">✉️ Bevestigingsmail succesvol geregistreerd</h3>
+            <h3 style="color: #1b5e20; margin-top: 0;">✉️ Aanvraag Geregistreerd</h3>
             <p>Beste <b>{sub['full_name']}</b>,</p>
             <p>Hartelijk dank voor uw aanvraag voor een <b>Verklaring Omtrent het Gedrag (Goedgedrag)</b> bij het Districtscommissariaat Wanica Centrum.</p>
-            <p>Wij hebben uw aanvraag en documenten in goede orde ontvangen en in behandeling genomen. Er is een bevestiging gestuurd naar <b>{sub['email']}</b>. Zodra uw aanvraag is beoordeeld, nemen wij contact met u op via dit e-mailadres of via uw telefoonnummer ({sub['phone_number']}).</p>
-            <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 15px 0;">
+            <p>Wij hebben uw aanvraag en documenten in goede orde ontvangen en in behandeling genomen. Zodra uw aanvraag is beoordeeld, nemen wij contact met u op via <b>{sub['email']}</b> of via uw telefoonnummer ({sub['phone_number']}).</p>
+            <br>
+            <a href="{mailto_link}" target="_blank" style="background-color: #1b5e20; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">📧 Klik hier om de bevestigingsmail direct te verzenden vanuit ggdaanvraag@gmail.com</a>
+            <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 20px 0;">
             <p style="margin-bottom: 0; font-size: 14px; color: #475569;">
                 <b>Districtscommissariaat Wanica Centrum</b><br>
                 Adres: Tawajarieweg No. 20 | Tel: +597-366660 / +597-366929
@@ -472,6 +481,13 @@ else:
                 <b>Huidige Status:</b> <span style="color: #1b5e20; font-weight: bold;">{selected_row['status']}</span>
             </div>
             """, unsafe_allow_html=True)
+
+            # Directe mailto knop ook in het dashboard voor medewerkers om de burger direct te mailen
+            m_sub = urllib.parse.quote("Bevestiging Aanvraag Verklaring Omtrent het Gedrag - Wanica Centrum")
+            m_body = urllib.parse.quote(f"Beste {selected_row['full_name']},\n\nHartelijk dank voor uw aanvraag voor een Verklaring Omtrent het Gedrag bij het Districtscommissariaat Wanica Centrum.\n\nWij hebben uw aanvraag in goede orde ontvangen en in behandeling genomen. Zodra uw aanvraag is beoordeeld, nemen wij contact met u op via dit e-mailadres of via uw telefoonnummer ({selected_row['phone_number']}).\n\nMet vriendelijke groet,\nDistrictscommissariaat Wanica Centrum")
+            staff_mailto = f"mailto:{selected_row['email']}?subject={m_sub}&body={m_body}"
+            
+            st.markdown(f'<a href="{staff_mailto}" target="_blank" style="background-color: #1b5e20; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 20px;">✉️ Stuur Bevestigingsmail naar burger ({selected_row["email"]})</a>', unsafe_allow_html=True)
 
             st.markdown("<b>📁 Geüploade Bestanden (Download verwijdert het bestand automatisch uit de database/server):</b>", unsafe_allow_html=True)
             
