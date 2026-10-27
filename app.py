@@ -16,7 +16,6 @@ st.set_page_config(
 def init_db():
     conn = sqlite3.connect('wanica.db')
     cursor = conn.cursor()
-    # Applications table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +31,6 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    # Staff / Medewerkers table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS staff (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +39,6 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    # Insert default admin if not exists
     cursor.execute("INSERT OR IGNORE INTO staff (username, password) VALUES (?, ?)", ("admin", "admin@123"))
     conn.commit()
     conn.close()
@@ -62,7 +59,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS for High Contrast and Clean Containers
+# Custom CSS for High Contrast and Clear Containers
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -165,7 +162,7 @@ def add_custom_css():
             margin: 25px 0 18px 0;
         }}
 
-        /* FORCE ALL LABELS INSIDE FORMS TO BE DARK & BOLD */
+        /* FORCE ALL LABELS INSIDE FORMS & WIDGETS TO BE DARK & BOLD */
         div[data-testid="stForm"] label, 
         div[data-testid="stForm"] div[data-testid="stWidgetLabel"] p,
         div[data-testid="stForm"] span,
@@ -185,37 +182,6 @@ def add_custom_css():
             padding: 12px 15px !important;
             font-size: 15px !important;
             font-weight: 600 !important;
-        }}
-
-        /* FILE UPLOADER VISIBILITY FIX */
-        [data-testid="stFileUploader"] {{
-            background-color: #f1f5f9 !important;
-            border: 2px dashed #475569 !important;
-            border-radius: 12px !important;
-            padding: 16px !important;
-        }}
-        [data-testid="stFileUploaderDropzone"] {{
-            background-color: #ffffff !important;
-            border: 1.5px solid #cbd5e1 !important;
-        }}
-        [data-testid="stFileUploaderDropzone"] * {{
-            color: #0f172a !important;
-            fill: #0f172a !important;
-        }}
-        [data-testid="stFileUploaderDropzone"] button {{
-            background-color: #1b5e20 !important;
-            color: #ffffff !important;
-            border: none !important;
-            border-radius: 8px !important;
-            font-weight: 700 !important;
-        }}
-        [data-testid="stFileUploaderDropzone"] button * {{
-            color: #ffffff !important;
-            fill: #ffffff !important;
-        }}
-        [data-testid="stFileUploaderDropzoneInstructions"] span {{
-            color: #0f172a !important;
-            font-weight: 700 !important;
         }}
 
         /* SUBMIT BUTTON VISIBILITY FIX */
@@ -241,7 +207,7 @@ def add_custom_css():
 
 add_custom_css()
 
-# Header HTML with MUCH LARGER LOGO (135px) and Prominent Contact Info
+# Header HTML with Logo & Contact Info
 logo_path = "logo.png"
 logo_html = ""
 
@@ -323,7 +289,17 @@ if menu == "Aanvraag Indienen (Burgers)":
                 conn.commit()
                 conn.close()
 
-                st.success("✅ Uw aanvraag is succesvol ingediend! U ontvangt een bericht zodra deze in behandeling is genomen.")
+                # Vriendelijke bevestigingsmail weergave voor de burger op het scherm
+                st.success("✅ Uw aanvraag is succesvol ingediend!")
+                st.markdown(f"""
+                <div style="background-color: #f8fafc; border: 2px solid #2e7d32; padding: 20px; border-radius: 12px; color: #0f172a; margin-top: 20px;">
+                    <h4 style="color: #1b5e20; margin-top: 0;">✉️ Bevestigingsmail verzonden naar: {email}</h4>
+                    <p>Beste <b>{full_name}</b>,</p>
+                    <p>Hartelijk dank voor uw aanvraag voor een <b>Verklaring Omtrent het Gedrag (Goedgedrag)</b> bij het Districtscommissariaat Wanica Centrum.</p>
+                    <p>Wij hebben uw aanvraag in goede orde ontvangen en in behandeling genomen. Zodra uw aanvraag is beoordeeld, nemen wij contact met u op via dit e-mailadres of uw telefoonnummer ({phone_number}).</p>
+                    <p style="margin-bottom: 0;">Met vriendelijke groet,<br><b>Districtscommissariaat Wanica Centrum</b></p>
+                </div>
+                """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # MEDEWERKERS DASHBOARD
@@ -361,7 +337,6 @@ else:
                     else:
                         st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
     else:
-        # Top bar with user info & logout
         col_user, col_logout = st.columns([4, 1])
         with col_user:
             st.markdown(f"<h3 style='color: #ffffff; margin-top: 10px;'>👋 Ingelogd als: <b>{st.session_state['username']}</b></h3>", unsafe_allow_html=True)
@@ -374,7 +349,7 @@ else:
         st.divider()
 
         # ---------------------------------------------------------
-        # ADMIN PANEL: Beheer Medewerkers (Alleen zichtbaar voor admin)
+        # ADMIN PANEL: Beheer Medewerkers
         # ---------------------------------------------------------
         if st.session_state['username'] == "admin":
             st.markdown("<h3 style='color: #ffffff;'>👥 Medewerkers Beheren (Admin Optie)</h3>", unsafe_allow_html=True)
@@ -436,7 +411,14 @@ else:
             st.markdown("---")
             st.markdown("<h3 style='color: #ffffff;'>⚙️ Beheer & Documenten Downloaden</h3>", unsafe_allow_html=True)
             
-            selected_app_id = st.selectbox("Selecteer Aanvraag ID voor Details / Beheer", df['id'].tolist())
+            # Duidelijke en goed leesbare selectie container
+            st.markdown("""
+            <div style="background-color: #ffffff; padding: 25px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); color: #0f172a; margin-bottom: 25px;">
+                <h4 style="color: #1b5e20; margin-top: 0; font-weight: 800;">🔍 Aanvraag Selecteren voor Beheer</h4>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            selected_app_id = st.selectbox("Kies hier het Aanvraag ID uit de lijst:", df['id'].tolist())
             selected_row = df[df['id'] == selected_app_id].iloc[0]
             
             st.markdown(f"""
