@@ -51,7 +51,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS for Background & Card Styling
+# Custom CSS for Enhanced UX and Modern Clean Design
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -59,7 +59,7 @@ def add_custom_css():
         with open(bg_image_path, "rb") as f:
             encoded_bg = base64.b64encode(f.read()).decode()
         bg_css = f"""
-            background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url("data:image/jpg;base64,{encoded_bg}") no-repeat center center fixed;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("data:image/jpg;base64,{encoded_bg}") no-repeat center center fixed;
             background-size: cover;
         """
 
@@ -69,70 +69,137 @@ def add_custom_css():
             {bg_css}
         }}
         
-        /* Header Styling */
+        /* Modern Header Layout */
         .custom-header {{
-            background-color: #1b5e20;
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
             border-bottom: 5px solid #144517;
-            padding: 20px 30px;
-            border-radius: 10px;
+            padding: 24px 35px;
+            border-radius: 14px;
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.35);
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 20px;
+        }}
+        .header-brand {{
+            display: flex;
+            align-items: center;
+            gap: 22px;
         }}
         .header-title h1 {{
             margin: 0;
-            font-size: 24px;
+            font-size: 26px;
             color: white;
-            font-weight: 700;
+            font-weight: 800;
+            letter-spacing: 0.3px;
         }}
         .header-title p {{
-            margin: 2px 0 0 0;
-            font-size: 14px;
+            margin: 4px 0 0 0;
+            font-size: 15px;
             color: #e2e8f0;
+            font-weight: 500;
         }}
         .header-contact {{
-            font-size: 13.5px;
+            font-size: 14px;
             text-align: right;
-            line-height: 1.6;
+            line-height: 1.7;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
         }}
 
-        /* White Card Container for content visibility */
+        /* White High-Contrast Main Card Container */
         .main-card {{
-            background-color: rgba(255, 255, 255, 0.96);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            margin-bottom: 30px;
-            color: #2d3748;
+            background-color: #ffffff;
+            padding: 38px 42px;
+            border-radius: 16px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.35);
+            margin-bottom: 35px;
+            color: #1a202c;
         }}
         
-        /* Form Labels */
+        /* Form Section Headers */
+        .section-header {{
+            background-color: #f0f7f1;
+            border-left: 5px solid #2e7d32;
+            padding: 12px 18px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1b5e20;
+            border-radius: 0 8px 8px 0;
+            margin: 25px 0 18px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+
+        /* High-Contrast Input Field Styling */
         .stTextInput label, .stFileUploader label, .stSelectbox label {{
-            color: #2d3748 !important;
-            font-weight: 600 !important;
+            color: #1a202c !important;
+            font-weight: 700 !important;
+            font-size: 14px !important;
+        }}
+
+        .stTextInput input {{
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+            border: 1.5px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            padding: 10px 14px !important;
+            font-size: 15px !important;
+        }}
+
+        .stTextInput input:focus {{
+            border-color: #2e7d32 !important;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
+        }}
+
+        /* File Upload Helper Box */
+        .stFileUploader {{
+            background-color: #f8fafc;
+            border: 1.5px dashed #cbd5e1;
+            padding: 12px;
+            border-radius: 10px;
+        }}
+
+        /* Submit Button Styling */
+        div.stButton > button {{
+            background-color: #2e7d32 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 16px !important;
+            padding: 14px 28px !important;
+            border-radius: 10px !important;
+            border: none !important;
+            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.3) !important;
+            transition: all 0.2s ease-in-out !important;
+        }}
+
+        div.stButton > button:hover {{
+            background-color: #1b5e20 !important;
+            transform: translateY(-1px);
         }}
     </style>
     """, unsafe_allow_html=True)
 
 add_custom_css()
 
-# Header HTML with Logo Base64 encoding
+# Header HTML with LARGER LOGO
 logo_path = "logo.png"
 logo_html = ""
 
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as f:
         encoded_logo = base64.b64encode(f.read()).decode()
-    logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="height: 75px; width: auto; background: white; padding: 4px; border-radius: 8px; margin-right: 20px;">'
+    logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="height: 110px; width: auto; background: #ffffff; padding: 6px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">'
 
 st.markdown(f"""
 <div class="custom-header">
-    <div style="display: flex; align-items: center;">
+    <div class="header-brand">
         {logo_html}
         <div class="header-title">
             <h1>Districtscommissariaat Wanica Centrum</h1>
@@ -147,40 +214,42 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Navigation
-menu = st.sidebar.radio("Navigatie", ["Aanvraag Indienen (Burgers)", "Medewerkers Login / Dashboard"])
+menu = st.sidebar.radio("Navigatie Menu", ["Aanvraag Indienen (Burgers)", "Medewerkers Login / Dashboard"])
 
 # ---------------------------------------------------------
 # BURGERS FORMULIER
 # ---------------------------------------------------------
 if menu == "Aanvraag Indienen (Burgers)":
     st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    st.subheader("📜 Aanvraag Verklaring Omtrent Gedrag")
-    st.caption("Vul het onderstaande formulier in en upload de vereiste documenten.")
+    
+    st.markdown("<h2 style='color: #1b5e20; font-weight: 800; margin-bottom: 5px;'>📜 Aanvraag Verklaring Omtrent het Gedrag (Goedgedrag)</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #4a5568; font-size: 15px; margin-bottom: 25px;'>Vul uw persoonsgegevens in en upload alle 4 verplichte documenten om uw aanvraag in te dienen.</p>", unsafe_allow_html=True)
 
     with st.form("public_form", clear_on_submit=True):
-        st.markdown("### 1. Persoonsgegevens")
+        st.markdown('<div class="section-header">👤 Stap 1: Persoonsgegevens</div>', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
-            full_name = st.text_input("Volledige Naam *")
-            id_number = st.text_input("ID / Paspoortnummer *")
+            full_name = st.text_input("Volledige Naam *", placeholder="Voer uw voor- en achternaam in")
+            id_number = st.text_input("ID / Paspoortnummer *", placeholder="Bijv. FD000784")
         with col2:
-            phone_number = st.text_input("Telefoonnummer *")
-            email = st.text_input("E-mailadres *")
+            phone_number = st.text_input("Telefoonnummer *", placeholder="Bijv. +597 8706661")
+            email = st.text_input("E-mailadres *", placeholder="naam@domein.sr")
 
-        st.markdown("### 2. Benodigde Documenten Uploaden")
+        st.markdown('<div class="section-header">📁 Stap 2: Benodigde Documenten Uploaden</div>', unsafe_allow_html=True)
         col3, col4 = st.columns(2)
         with col3:
-            uitreksel = st.file_uploader("Uitreksel (PDF/Afbeelding) *", type=['pdf', 'jpg', 'jpeg', 'png'])
-            pasfoto = st.file_uploader("Pasfoto *", type=['jpg', 'jpeg', 'png'])
+            uitreksel = st.file_uploader("Uitreksel (PDF/Afbeelding) *", type=['pdf', 'jpg', 'jpeg', 'png'], help="Upload een recent uitreksel van CBB")
+            pasfoto = st.file_uploader("Pasfoto *", type=['jpg', 'jpeg', 'png'], help="Upload een duidelijke, recente pasfoto")
         with col4:
-            id_kaart = st.file_uploader("Kopie Geldig ID-kaart *", type=['pdf', 'jpg', 'jpeg', 'png'])
-            bankbewijs = st.file_uploader("Bewijs van Bankovermaking *", type=['pdf', 'jpg', 'jpeg', 'png'])
+            id_kaart = st.file_uploader("Kopie Geldig ID-kaart *", type=['pdf', 'jpg', 'jpeg', 'png'], help="Voor- en achterkant van ID-kaart")
+            bankbewijs = st.file_uploader("Bewijs van Bankovermaking *", type=['pdf', 'jpg', 'jpeg', 'png'], help="Betalingsbewijs van de leges")
 
-        submitted = st.form_submit_button("Aanvraag Definitief Indienen", use_container_width=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        submitted = st.form_submit_button("🚀 Aanvraag Definitief Indienen", use_container_width=True)
 
         if submitted:
             if not (full_name and id_number and phone_number and email and uitreksel and pasfoto and id_kaart and bankbewijs):
-                st.error("❌ Vul alstublieft alle verplichte velden in en upload alle 4 documenten.")
+                st.error("⚠️ Vul alstublieft alle verplichte velden in en upload alle 4 documenten.")
             else:
                 u_name = save_file(uitreksel)
                 p_name = save_file(pasfoto)
@@ -205,21 +274,22 @@ if menu == "Aanvraag Indienen (Burgers)":
 # ---------------------------------------------------------
 else:
     st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    st.subheader("🔒 Medewerkers Portaal")
+    st.markdown("<h2 style='color: #1b5e20; font-weight: 800;'>🔒 Medewerkers Portaal Dashboard</h2>", unsafe_allow_html=True)
 
     if 'logged_in' not in st.session_state:
         st.session_state['logged_in'] = False
 
     if not st.session_state['logged_in']:
+        st.markdown('<div class="section-header">Inloggen met Beheerdersaccount</div>', unsafe_allow_html=True)
         user = st.text_input("Gebruikersnaam")
         pwd = st.text_input("Wachtwoord", type="password")
         if st.button("Inloggen"):
-            if user == "admin" and pwd == "admin":  # Beheerderswachtwoord
+            if user == "admin" and pwd == "admin":  # Wachtwoord instellen
                 st.session_state['logged_in'] = True
                 st.session_state['username'] = user
                 st.rerun()
             else:
-                st.error("Ongeldige inloggegevens.")
+                st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
     else:
         st.write(f"👋 Ingelogd als: **{st.session_state['username']}**")
         if st.button("Uitloggen"):
