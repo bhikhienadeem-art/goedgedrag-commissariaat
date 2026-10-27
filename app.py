@@ -234,4 +234,35 @@ else:
 
         st.markdown("### 📋 Binnengekomen Aanvragen")
         if not df.empty:
-            st.dataframe(df, use_container
+            st.dataframe(df, use_container_width=True)
+
+            st.markdown("---")
+            st.markdown("### ⚙️ Beheer Aanvraag")
+            app_id = st.selectbox("Selecteer Aanvraag ID", df['id'].tolist())
+
+            col_status, col_del = st.columns(2)
+            with col_status:
+                new_status = st.selectbox("Status aanpassen", ["In behandeling", "Goedgekeurd", "Afgekeurd"])
+                if st.button("Status Update"):
+                    conn = sqlite3.connect('wanica.db')
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (new_status, app_id))
+                    conn.commit()
+                    conn.close()
+                    st.success(f"Status voor ID #{app_id} bijgewerkt!")
+                    st.rerun()
+
+            with col_del:
+                st.write("Verwijderen")
+                if st.button("🗑️ Aanvraag Verwijderen", type="primary"):
+                    conn = sqlite3.connect('wanica.db')
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM applications WHERE id = ?", (app_id,))
+                    conn.commit()
+                    conn.close()
+                    st.warning(f"Aanvraag #{app_id} verwijderd!")
+                    st.rerun()
+        else:
+            st.info("Geen aanvragen gevonden.")
+
+    st.markdown('</div>', unsafe_allow_html=True)
