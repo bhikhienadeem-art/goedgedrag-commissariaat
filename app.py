@@ -119,7 +119,7 @@ def add_custom_css():
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }}
 
-        /* SOLID WHITE CONTAINER FOR FORM */
+        /* SOLID WHITE CONTAINER FOR FORMS */
         div[data-testid="stForm"] {{
             background-color: #ffffff !important;
             padding: 40px !important;
@@ -253,7 +253,7 @@ if menu == "Aanvraag Indienen (Burgers)":
     <div style="background-color: rgba(255, 255, 255, 0.95); padding: 20px 25px; border-radius: 14px; margin-bottom: 25px; border-left: 6px solid #1b5e20; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">
         <h3 style="color: #1b5e20; margin-top: 0; font-weight: 800; font-size: 18px;">Welkom bij het Online Aanvraagportaal</h3>
         <p style="color: #0f172a; font-size: 14.5px; line-height: 1.6; margin-bottom: 0;">
-            Via dit portaal kunt u als burger van Wanica Centrum eenvoudig online uw <b>Goedgedrag Verklaring</b> aanvragen en de benodigde documenten uploaden. Vul het onderstaande formulier volledig en correct in om uw aanvraag in behandeling te nemen.
+            Via dit portaal kunt u als burger van Wanica Centrum eenvoudig online uw <b>Verklaring Omtrent het Gedrag (Goedgedrag)</b> aanvragen en de benodigde documenten uploaden. Vul het onderstaande formulier volledig en correct in om uw aanvraag in behandeling te nemen.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -310,18 +310,17 @@ else:
         st.session_state['logged_in'] = False
 
     if not st.session_state['logged_in']:
-        with st.form("login_form"):
-            st.markdown('<div class="section-header">Inloggen met Beheerdersaccount</div>', unsafe_allow_html=True)
-            user = st.text_input("Gebruikersnaam")
-            pwd = st.text_input("Wachtwoord", type="password")
-            login_submitted = st.form_submit_button("🔑 Inloggen")
-            if login_submitted:
-                if user == "admin" and pwd == "admin":
-                    st.session_state['logged_in'] = True
-                    st.session_state['username'] = user
-                    st.rerun()
-                else:
-                    st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
+        st.markdown('<div class="section-header">Inloggen met Beheerdersaccount</div>', unsafe_allow_html=True)
+        user = st.text_input("Gebruikersnaam", key="login_user")
+        pwd = st.text_input("Wachtwoord", type="password", key="login_pwd")
+        
+        if st.button("🔑 Inloggen", use_container_width=True):
+            if user == "admin" and pwd == "admin":
+                st.session_state['logged_in'] = True
+                st.session_state['username'] = user
+                st.rerun()
+            else:
+                st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
     else:
         st.write(f"👋 Ingelogd als: **{st.session_state['username']}**")
         if st.button("Uitloggen"):
