@@ -12,10 +12,11 @@ st.set_page_config(
     layout="wide"
 )
 
-# Initialize Database
+# Initialize Database & Tables
 def init_db():
     conn = sqlite3.connect('wanica.db')
     cursor = conn.cursor()
+    # Applications table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,6 +32,17 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    # Staff / Medewerkers table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS staff (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    # Insert default admin if not exists
+    cursor.execute("INSERT OR IGNORE INTO staff (username, password) VALUES (?, ?)", ("admin", "admin@123"))
     conn.commit()
     conn.close()
 
@@ -43,7 +55,6 @@ if not os.path.exists(UPLOAD_DIR):
 
 def save_file(uploaded_file):
     if uploaded_file is not None:
-        file_ext = uploaded_file.name.split('.')[-1]
         new_name = f"{hashlib.md5(uploaded_file.name.encode()).hexdigest()}_{uploaded_file.name}"
         path = os.path.join(UPLOAD_DIR, new_name)
         with open(path, "wb") as f:
@@ -263,7 +274,6 @@ menu = st.sidebar.radio("Navigatie Menu", ["Aanvraag Indienen (Burgers)", "Medew
 # ---------------------------------------------------------
 if menu == "Aanvraag Indienen (Burgers)":
     
-    # Kort en zakelijke welkomsttekst
     st.markdown("""
     <div style="background-color: rgba(255, 255, 255, 0.95); padding: 20px 25px; border-radius: 14px; margin-bottom: 25px; border-left: 6px solid #1b5e20; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">
         <h3 style="color: #1b5e20; margin-top: 0; font-weight: 800; font-size: 18px;">Welkom bij het Online Aanvraagportaal</h3>
@@ -323,73 +333,204 @@ else:
 
     if 'logged_in' not in st.session_state:
         st.session_state['logged_in'] = False
+        st.session_state['username'] = ""
 
     if not st.session_state['logged_in']:
         with st.form("login_form"):
-            st.markdown('<div class="section-header">Inloggen met Beheerdersaccount</div>', unsafe_allow_html=True)
-            user = st.text_input("Gebruikersnaam", placeholder="Voer gebruikersnaam in")
-            pwd = st.text_input("Wachtwoord", type="password", placeholder="Voer wachtwoord in")
+            st.markdown('<div class="section-header">Inloggen met Beheerders- of Medewerkersaccount</div>', unsafe_allow_html=True)
+            user_input = st.text_input("Gebruikersnaam", placeholder="Voer gebruikersnaam in")
+            pwd_input = st.text_input("Wachtwoord", type="password", placeholder="Voer wachtwoord in")
             login_submitted = st.form_submit_button("🔑 Inloggen")
             
             if login_submitted:
-                if user == "admin" and pwd == "admin@123":
+                if user_input == "admin" and pwd_input == "admin@123":
                     st.session_state['logged_in'] = True
-                    st.session_state['username'] = user
+                    st.session_state['username'] = "admin"
                     st.rerun()
                 else:
-                    st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
+                    conn = sqlite3.connect('wanica.db')
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT * FROM staff WHERE username = ? AND password = ?", (user_input, pwd_input))
+                    staff_member = cursor.fetchone()
+                    conn.close()
+                    
+                    if staff_member:
+                        st.session_state['logged_in'] = True
+                        st.session_state['username'] = user_input
+                        st.rerun()
+                    else:
+                        st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
     else:
-        # GEEN lege witte container meer, maar direct nette weergave op de achtergrond
+        # Top bar with user info & logout
         col_user, col_logout = st.columns([4, 1])
         with col_user:
-            st.markdown("<h3 style='color: #ffffff; margin-top: 10px;'>👋 Welkom, Ingelogd als: admin</h3>", unsafe_allow_html=True)
+            st.markdown(f"<h3 style='color: #ffffff; margin-top: 10px;'>👋 Ingelogd als: <b>{st.session_state['username']}</b></h3>", unsafe_allow_html=True)
         with col_logout:
             if st.button("🚪 Uitloggen", use_container_width=True):
                 st.session_state['logged_in'] = False
+                st.session_state['username'] = ""
                 st.rerun()
 
         st.divider()
 
+        # ---------------------------------------------------------
+        # ADMIN PANEL: Beheer Medewerkers (Alleen zichtbaar voor admin)
+        # ---------------------------------------------------------
+        if st.session_state['username'] == "admin":
+            st.markdown("<h3 style='color: #ffffff;'>👥 Medewerkers Beheren (Admin Optie)</h3>", unsafe_allow_html=True)
+            with st.expander("➕ Nieuwe Medewerker Toevoegen of Verwijderen"):
+                with st.form("add_staff_form"):
+                    new_staff_user = st.text_input("Nieuwe Medewerker Gebruikersnaam")
+                    new_staff_pwd = st.text_input("Nieuw Wachtwoord", type="password")
+                    add_staff_btn = st.form_submit_button("Medewerker Aanmaken")
+                    
+                    if add_staff_btn:
+                        if new_staff_user and new_staff_pwd:
+                            try:
+                                conn = sqlite3.connect('wanica.db')
+                                cursor = conn.cursor()
+                                cursor.execute("INSERT INTO staff (username, password) VALUES (?, ?)", (new_staff_user, new_staff_pwd))
+                                conn.commit()
+                                conn.close()
+                                st.success(f"Medewerker '{new_staff_user}' succesvol toegevoegd!")
+                                st.rerun()
+                            except sqlite3.IntegrityError:
+                                st.error("❌ Deze gebruikersnaam bestaat al.")
+                        else:
+                            st.warning("Vul zowel gebruikersnaam als wachtwoord in.")
+
+                conn = sqlite3.connect('wanica.db')
+                staff_df = pd.read_sql_query("SELECT id, username, created_at FROM staff WHERE username != 'admin'", conn)
+                conn.close()
+
+                if not staff_df.empty:
+                    st.markdown("<b>Bestaande medewerkers:</b>", unsafe_allow_html=True)
+                    st.dataframe(staff_df, use_container_width=True)
+                    
+                    del_staff_id = st.selectbox("Selecteer Medewerker ID om te verwijderen", staff_df['id'].tolist(), key="del_staff")
+                    if st.button("🗑️ Geselecteerde Medewerker Verwijderen"):
+                        conn = sqlite3.connect('wanica.db')
+                        cursor = conn.cursor()
+                        cursor.execute("DELETE FROM staff WHERE id = ?", (del_staff_id,))
+                        conn.commit()
+                        conn.close()
+                        st.warning(f"Medewerker #{del_staff_id} verwijderd!")
+                        st.rerun()
+                else:
+                    st.info("Geen extra medewerkers gevonden.")
+            st.divider()
+
+        # ---------------------------------------------------------
+        # DASHBOARD: Binnengekomen Aanvragen
+        # ---------------------------------------------------------
         conn = sqlite3.connect('wanica.db')
-        df = pd.read_sql_query("SELECT id, full_name, id_number, phone_number, email, status, created_at FROM applications ORDER BY id DESC", conn)
+        df = pd.read_sql_query("SELECT id, full_name, id_number, phone_number, email, uitreksel_file, pasfoto_file, id_kaart_file, bankbewijs_file, status, created_at FROM applications ORDER BY id DESC", conn)
         conn.close()
 
-        st.markdown("<h3 style='color: #ffffff;'>📋 Binnengekomen Aanvragen</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #ffffff;'>📋 Binnengekomen Aanvragen & Documenten</h3>", unsafe_allow_html=True)
+        
         if not df.empty:
-            st.dataframe(df, use_container_width=True)
+            display_df = df[['id', 'full_name', 'id_number', 'phone_number', 'email', 'status', 'created_at']]
+            st.dataframe(display_df, use_container_width=True)
 
             st.markdown("---")
-            st.markdown("<h3 style='color: #ffffff;'>⚙️ Beheer Aanvraag</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #ffffff;'>⚙️ Beheer & Documenten Downloaden</h3>", unsafe_allow_html=True)
             
-            # Witte sub-container voor beheer opties zodat het netjes leesbaar is
+            selected_app_id = st.selectbox("Selecteer Aanvraag ID voor Details / Beheer", df['id'].tolist())
+            selected_row = df[df['id'] == selected_app_id].iloc[0]
+            
+            st.markdown(f"""
+            <div style="background-color: #ffffff; padding: 20px; border-radius: 10px; color: #0f172a; margin-bottom: 20px;">
+                <b>Geselecteerde Aanvraag #{selected_row['id']}</b><br>
+                <b>Naam:</b> {selected_row['full_name']} | <b>ID-Nr:</b> {selected_row['id_number']}<br>
+                <b>Telefoon:</b> {selected_row['phone_number']} | <b>E-mail:</b> {selected_row['email']}<br>
+                <b>Huidige Status:</b> <span style="color: #1b5e20; font-weight: bold;">{selected_row['status']}</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Documenten downloaden & automatisch verwijderen uit database
+            st.markdown("<b>📁 Geüploade Bestanden (Download verwijdert het bestand automatisch uit de database/server):</b>", unsafe_allow_html=True)
+            
+            files_dict = {
+                "Uitreksel": selected_row['uitreksel_file'],
+                "Pasfoto": selected_row['pasfoto_file'],
+                "ID-Kaart": selected_row['id_kaart_file'],
+                "Bankbewijs": selected_row['bankbewijs_file']
+            }
+
+            col_d1, col_d2, col_d3, col_d4 = st.columns(4)
+            cols = [col_d1, col_d2, col_d3, col_d4]
+
+            for idx, (label, fname) in enumerate(files_dict.items()):
+                with cols[idx]:
+                    if fname:
+                        fpath = os.path.join(UPLOAD_DIR, fname)
+                        if os.path.exists(fpath):
+                            with open(fpath, "rb") as f:
+                                file_bytes = f.read()
+                            
+                            if st.download_button(label=f"📥 Download {label}", data=file_bytes, file_name=fname, key=f"dl_{selected_app_id}_{label}"):
+                                conn = sqlite3.connect('wanica.db')
+                                cursor = conn.cursor()
+                                col_map = {
+                                    "Uitreksel": "uitreksel_file",
+                                    "Pasfoto": "pasfoto_file",
+                                    "ID-Kaart": "id_kaart_file",
+                                    "Bankbewijs": "bankbewijs_file"
+                                }
+                                cursor.execute(f"UPDATE applications SET {col_map[label]} = NULL WHERE id = ?", (selected_app_id,))
+                                conn.commit()
+                                conn.close()
+                                
+                                try:
+                                    os.remove(fpath)
+                                except OSError:
+                                    pass
+                                
+                                st.success(f"{label} gedownload en automatisch uit het systeem verwijderd!")
+                                st.rerun()
+                        else:
+                            st.caption(f"❌ {label}: Reeds gedownload / verwijderd")
+                    else:
+                        st.caption(f"⚠️ {label}: Niet beschikbaar")
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
             with st.form("manage_form"):
-                app_id = st.selectbox("Selecteer Aanvraag ID", df['id'].tolist())
-                new_status = st.selectbox("Status aanpassen", ["In behandeling", "Goedgekeurd", "Afgekeurd"])
+                new_status = st.selectbox("Status aanpassen", ["In behandeling", "Goedgekeurd", "Afgekeurd"], index=["In behandeling", "Goedgekeurd", "Afgekeurd"].index(selected_row['status']))
                 
                 col_btn1, col_btn2 = st.columns(2)
                 with col_btn1:
-                    update_submitted = st.form_submit_button("💾 Status Update")
+                    update_submitted = st.form_submit_button("💾 Status Bijwerken")
                 with col_btn2:
-                    delete_submitted = st.form_submit_button("🗑️ Aanvraag Verwijderen")
+                    delete_submitted = st.form_submit_button("🗑️ Volledige Aanvraag Verwijderen")
 
                 if update_submitted:
                     conn = sqlite3.connect('wanica.db')
                     cursor = conn.cursor()
-                    cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (new_status, app_id))
+                    cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (new_status, selected_app_id))
                     conn.commit()
                     cursor.close()
                     conn.close()
-                    st.success(f"Status voor ID #{app_id} bijgewerkt!")
+                    st.success(f"Status voor ID #{selected_app_id} bijgewerkt naar '{new_status}'!")
                     st.rerun()
 
                 if delete_submitted:
                     conn = sqlite3.connect('wanica.db')
                     cursor = conn.cursor()
-                    cursor.execute("DELETE FROM applications WHERE id = ?", (app_id,))
+                    for f in [selected_row['uitreksel_file'], selected_row['pasfoto_file'], selected_row['id_kaart_file'], selected_row['bankbewijs_file']]:
+                        if f:
+                            fp = os.path.join(UPLOAD_DIR, f)
+                            if os.path.exists(fp):
+                                try:
+                                    os.remove(fp)
+                                except OSError:
+                                    pass
+                    cursor.execute("DELETE FROM applications WHERE id = ?", (selected_app_id,))
                     conn.commit()
                     cursor.close()
                     conn.close()
-                    st.warning(f"Aanvraag #{app_id} verwijderd!")
+                    st.warning(f"Aanvraag #{selected_app_id} en alle bijbehorende bestanden zijn volledig verwijderd!")
                     st.rerun()
         else:
-            st.info("Geen aanvragen gevonden.")
+            st.info("Geen aanvragen gevonden in het systeem.")
