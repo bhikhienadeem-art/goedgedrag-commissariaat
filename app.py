@@ -51,7 +51,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS with Clean White Card Container for Login & Forms
+# Custom CSS with High Contrast for Sidebar and Forms
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -72,7 +72,22 @@ def add_custom_css():
             {bg_css}
         }}
         
-        /* Modern Header Layout with Larger, Prominent Elements */
+        /* SIDEBAR FIX: Light Background & Dark Readable Text */
+        [data-testid="stSidebar"] {{
+            background-color: #f8fafc !important;
+            border-right: 2px solid #cbd5e1 !important;
+        }}
+        [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label, [data-testid="stSidebar"] div {{
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }}
+        [data-testid="stSidebar"] .stRadio label {{
+            color: #0f172a !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+        }}
+
+        /* Modern Header Layout */
         .custom-header {{
             background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
             border-bottom: 6px solid #144517;
@@ -310,7 +325,6 @@ else:
         st.session_state['logged_in'] = False
 
     if not st.session_state['logged_in']:
-        # Wrapped inside a clean white st.form container for consistent layout
         with st.form("login_form"):
             st.markdown('<div class="section-header">Inloggen met Beheerdersaccount</div>', unsafe_allow_html=True)
             user = st.text_input("Gebruikersnaam", placeholder="Voer gebruikersnaam in")
@@ -325,7 +339,6 @@ else:
                 else:
                     st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
     else:
-        # Wrap dashboard inside a white card container for high contrast
         st.markdown('<div style="background-color: #ffffff; padding: 35px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); color: #0f172a;">', unsafe_allow_html=True)
         st.write(f"👋 Ingelogd als: **{st.session_state['username']}**")
         if st.button("Uitloggen"):
