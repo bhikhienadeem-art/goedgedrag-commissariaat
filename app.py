@@ -248,8 +248,15 @@ menu = st.sidebar.radio("Navigatie Menu", ["Aanvraag Indienen (Burgers)", "Medew
 # ---------------------------------------------------------
 if menu == "Aanvraag Indienen (Burgers)":
     
-    st.markdown("<h2 style='color: #ffffff; font-weight: 800; margin-bottom: 5px;'>📜 Aanvraag Verklaring van Goedgedrag</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #f1f5f9; font-size: 15px; margin-bottom: 25px;'>Vul uw persoonsgegevens in en upload alle 4 verplichte documenten om uw aanvraag in te dienen.</p>", unsafe_allow_html=True)
+    # Kort en zakelijke welkomsttekst
+    st.markdown("""
+    <div style="background-color: rgba(255, 255, 255, 0.95); padding: 20px 25px; border-radius: 14px; margin-bottom: 25px; border-left: 6px solid #1b5e20; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">
+        <h3 style="color: #1b5e20; margin-top: 0; font-weight: 800; font-size: 18px;">Welkom bij het Online Aanvraagportaal</h3>
+        <p style="color: #0f172a; font-size: 14.5px; line-height: 1.6; margin-bottom: 0;">
+            Via dit portaal kunt u als burger van Wanica Centrum eenvoudig online uw <b>Goedgedrag Verklaring</b> aanvragen en de benodigde documenten uploaden. Vul het onderstaande formulier volledig en correct in om uw aanvraag in behandeling te nemen.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     with st.form("public_form", clear_on_submit=True):
         st.markdown('<div class="section-header">👤 Stap 1: Persoonsgegevens</div>', unsafe_allow_html=True)
