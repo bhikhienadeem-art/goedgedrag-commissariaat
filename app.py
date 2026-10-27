@@ -51,7 +51,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS for Enhanced UX and Modern Clean Design
+# Custom CSS for Perfect Contrast, Clean Font, and No Ghost White Box
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -59,13 +59,16 @@ def add_custom_css():
         with open(bg_image_path, "rb") as f:
             encoded_bg = base64.b64encode(f.read()).decode()
         bg_css = f"""
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("data:image/jpg;base64,{encoded_bg}") no-repeat center center fixed;
+            background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url("data:image/jpg;base64,{encoded_bg}") no-repeat center center fixed;
             background-size: cover;
         """
 
     st.markdown(f"""
     <style>
-        .stApp {{
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+        html, body, [class*="css"], .stApp {{
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
             {bg_css}
         }}
         
@@ -73,96 +76,105 @@ def add_custom_css():
         .custom-header {{
             background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
             border-bottom: 5px solid #144517;
-            padding: 24px 35px;
+            padding: 22px 30px;
             border-radius: 14px;
-            color: white;
+            color: #ffffff;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
             flex-wrap: wrap;
             gap: 20px;
         }}
         .header-brand {{
             display: flex;
             align-items: center;
-            gap: 22px;
+            gap: 20px;
         }}
         .header-title h1 {{
             margin: 0;
-            font-size: 26px;
-            color: white;
+            font-size: 25px;
+            color: #ffffff !important;
             font-weight: 800;
             letter-spacing: 0.3px;
         }}
         .header-title p {{
             margin: 4px 0 0 0;
             font-size: 15px;
-            color: #e2e8f0;
-            font-weight: 500;
+            color: #e2e8f0 !important;
+            font-weight: 600;
         }}
         .header-contact {{
-            font-size: 14px;
+            font-size: 13.5px;
             text-align: right;
             line-height: 1.7;
-            background: rgba(255, 255, 255, 0.12);
-            padding: 12px 18px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 16px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }}
 
-        /* White High-Contrast Main Card Container */
-        .main-card {{
-            background-color: #ffffff;
-            padding: 38px 42px;
-            border-radius: 16px;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.35);
-            margin-bottom: 35px;
-            color: #1a202c;
+        /* SOLID OPAQUE WHITE CONTAINER FOR FORM */
+        div[data-testid="stForm"] {{
+            background-color: #ffffff !important;
+            padding: 35px !important;
+            border-radius: 16px !important;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.45) !important;
+            border: 1px solid #e2e8f0 !important;
         }}
         
         /* Form Section Headers */
         .section-header {{
-            background-color: #f0f7f1;
+            background-color: #e8f5e9;
             border-left: 5px solid #2e7d32;
             padding: 12px 18px;
             font-size: 16px;
-            font-weight: 700;
-            color: #1b5e20;
+            font-weight: 800;
+            color: #1b5e20 !important;
             border-radius: 0 8px 8px 0;
-            margin: 25px 0 18px 0;
+            margin: 22px 0 18px 0;
             display: flex;
             align-items: center;
             gap: 10px;
         }}
 
-        /* High-Contrast Input Field Styling */
-        .stTextInput label, .stFileUploader label, .stSelectbox label {{
-            color: #1a202c !important;
+        /* HIGH-CONTRAST LABELS & INPUTS */
+        .stMarkdown, .stMarkdown p, h1, h2, h3, h4, span {{
+            color: #ffffff;
+        }}
+
+        div[data-testid="stForm"] .stMarkdown p, div[data-testid="stForm"] h1, div[data-testid="stForm"] h2, div[data-testid="stForm"] h3 {{
+            color: #0f172a !important;
+        }}
+
+        label, div[data-testid="stWidgetLabel"] p {{
+            color: #0f172a !important;
             font-weight: 700 !important;
-            font-size: 14px !important;
+            font-size: 14.5px !important;
         }}
 
         .stTextInput input {{
-            background-color: #f8fafc !important;
+            background-color: #ffffff !important;
             color: #0f172a !important;
-            border: 1.5px solid #cbd5e1 !important;
+            border: 2px solid #94a3b8 !important;
             border-radius: 8px !important;
-            padding: 10px 14px !important;
+            padding: 11px 14px !important;
             font-size: 15px !important;
+            font-weight: 500 !important;
         }}
 
         .stTextInput input:focus {{
             border-color: #2e7d32 !important;
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2) !important;
         }}
 
         /* File Upload Helper Box */
         .stFileUploader {{
             background-color: #f8fafc;
-            border: 1.5px dashed #cbd5e1;
-            padding: 12px;
+            border: 2px dashed #94a3b8;
+            padding: 14px;
             border-radius: 10px;
         }}
 
@@ -170,18 +182,16 @@ def add_custom_css():
         div.stButton > button {{
             background-color: #2e7d32 !important;
             color: #ffffff !important;
-            font-weight: 700 !important;
-            font-size: 16px !important;
+            font-weight: 800 !important;
+            font-size: 16.5px !important;
             padding: 14px 28px !important;
             border-radius: 10px !important;
             border: none !important;
-            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.3) !important;
-            transition: all 0.2s ease-in-out !important;
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4) !important;
         }}
 
         div.stButton > button:hover {{
             background-color: #1b5e20 !important;
-            transform: translateY(-1px);
         }}
     </style>
     """, unsafe_allow_html=True)
@@ -195,7 +205,7 @@ logo_html = ""
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as f:
         encoded_logo = base64.b64encode(f.read()).decode()
-    logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="height: 110px; width: auto; background: #ffffff; padding: 6px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">'
+    logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="height: 110px; width: auto; background: #ffffff; padding: 6px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">'
 
 st.markdown(f"""
 <div class="custom-header">
@@ -220,10 +230,9 @@ menu = st.sidebar.radio("Navigatie Menu", ["Aanvraag Indienen (Burgers)", "Medew
 # BURGERS FORMULIER
 # ---------------------------------------------------------
 if menu == "Aanvraag Indienen (Burgers)":
-    st.markdown('<div class="main-card">', unsafe_allow_html=True)
     
-    st.markdown("<h2 style='color: #1b5e20; font-weight: 800; margin-bottom: 5px;'>📜 Aanvraag Verklaring Omtrent het Gedrag (Goedgedrag)</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #4a5568; font-size: 15px; margin-bottom: 25px;'>Vul uw persoonsgegevens in en upload alle 4 verplichte documenten om uw aanvraag in te dienen.</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #ffffff; font-weight: 800; margin-bottom: 5px;'>📜 Aanvraag Verklaring Omtrent het Gedrag (Goedgedrag)</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #f1f5f9; font-size: 15px; margin-bottom: 25px;'>Vul uw persoonsgegevens in en upload alle 4 verplichte documenten om uw aanvraag in te dienen.</p>", unsafe_allow_html=True)
 
     with st.form("public_form", clear_on_submit=True):
         st.markdown('<div class="section-header">👤 Stap 1: Persoonsgegevens</div>', unsafe_allow_html=True)
@@ -266,30 +275,29 @@ if menu == "Aanvraag Indienen (Burgers)":
                 conn.close()
 
                 st.success("✅ Uw aanvraag is succesvol ingediend! U ontvangt een bericht zodra deze in behandeling is genomen.")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # MEDEWERKERS DASHBOARD
 # ---------------------------------------------------------
 else:
-    st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    st.markdown("<h2 style='color: #1b5e20; font-weight: 800;'>🔒 Medewerkers Portaal Dashboard</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #ffffff; font-weight: 800;'>🔒 Medewerkers Portaal Dashboard</h2>", unsafe_allow_html=True)
 
     if 'logged_in' not in st.session_state:
         st.session_state['logged_in'] = False
 
     if not st.session_state['logged_in']:
-        st.markdown('<div class="section-header">Inloggen met Beheerdersaccount</div>', unsafe_allow_html=True)
-        user = st.text_input("Gebruikersnaam")
-        pwd = st.text_input("Wachtwoord", type="password")
-        if st.button("Inloggen"):
-            if user == "admin" and pwd == "admin":  # Wachtwoord instellen
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = user
-                st.rerun()
-            else:
-                st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
+        with st.form("login_form"):
+            st.markdown('<div class="section-header">Inloggen met Beheerdersaccount</div>', unsafe_allow_html=True)
+            user = st.text_input("Gebruikersnaam")
+            pwd = st.text_input("Wachtwoord", type="password")
+            login_submitted = st.form_submit_button("🔑 Inloggen")
+            if login_submitted:
+                if user == "admin" and pwd == "admin":
+                    st.session_state['logged_in'] = True
+                    st.session_state['username'] = user
+                    st.rerun()
+                else:
+                    st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
     else:
         st.write(f"👋 Ingelogd als: **{st.session_state['username']}**")
         if st.button("Uitloggen"):
@@ -334,5 +342,3 @@ else:
                     st.rerun()
         else:
             st.info("Geen aanvragen gevonden.")
-
-    st.markdown('</div>', unsafe_allow_html=True)
