@@ -248,7 +248,7 @@ menu = st.sidebar.radio("Navigatie Menu", ["Aanvraag Indienen (Burgers)", "Medew
 # ---------------------------------------------------------
 if menu == "Aanvraag Indienen (Burgers)":
     
-    st.markdown("<h2 style='color: #ffffff; font-weight: 800; margin-bottom: 5px;'>📜 Aanvraag Verklaring Omtrent het Gedrag (Goedgedrag)</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #ffffff; font-weight: 800; margin-bottom: 5px;'>📜 Aanvraag Verklaring van Goedgedrag</h2>", unsafe_allow_html=True)
     st.markdown("<p style='color: #f1f5f9; font-size: 15px; margin-bottom: 25px;'>Vul uw persoonsgegevens in en upload alle 4 verplichte documenten om uw aanvraag in te dienen.</p>", unsafe_allow_html=True)
 
     with st.form("public_form", clear_on_submit=True):
