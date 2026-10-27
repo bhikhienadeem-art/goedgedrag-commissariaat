@@ -59,7 +59,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS for High Contrast and Clear Containers
+# Custom CSS with Absolute Readability for Uploaders and Forms
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -184,6 +184,35 @@ def add_custom_css():
             font-weight: 600 !important;
         }}
 
+        /* ABSOLUTE READABILITY FIX FOR FILE UPLOADER */
+        [data-testid="stFileUploader"] {{
+            background-color: #f8fafc !important;
+            border: 2px dashed #cbd5e1 !important;
+            border-radius: 12px !important;
+            padding: 16px !important;
+        }}
+        [data-testid="stFileUploader"] section {{
+            background-color: #ffffff !important;
+            border: 1px solid #94a3b8 !important;
+        }}
+        [data-testid="stFileUploader"] section * {{
+            color: #0f172a !important;
+        }}
+        [data-testid="stFileUploader"] small, [data-testid="stFileUploader"] span {{
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }}
+        [data-testid="stFileUploader"] button {{
+            background-color: #1b5e20 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            border-radius: 8px !important;
+            border: none !important;
+        }}
+        [data-testid="stFileUploader"] button * {{
+            color: #ffffff !important;
+        }}
+
         /* SUBMIT BUTTON VISIBILITY FIX */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {{
             background-color: #1b5e20 !important;
@@ -289,7 +318,6 @@ if menu == "Aanvraag Indienen (Burgers)":
                 conn.commit()
                 conn.close()
 
-                # Vriendelijke bevestigingsmail weergave voor de burger op het scherm
                 st.success("✅ Uw aanvraag is succesvol ingediend!")
                 st.markdown(f"""
                 <div style="background-color: #f8fafc; border: 2px solid #2e7d32; padding: 20px; border-radius: 12px; color: #0f172a; margin-top: 20px;">
@@ -411,108 +439,5 @@ else:
             st.markdown("---")
             st.markdown("<h3 style='color: #ffffff;'>⚙️ Beheer & Documenten Downloaden</h3>", unsafe_allow_html=True)
             
-            # Duidelijke en goed leesbare selectie container
             st.markdown("""
-            <div style="background-color: #ffffff; padding: 25px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); color: #0f172a; margin-bottom: 25px;">
-                <h4 style="color: #1b5e20; margin-top: 0; font-weight: 800;">🔍 Aanvraag Selecteren voor Beheer</h4>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            selected_app_id = st.selectbox("Kies hier het Aanvraag ID uit de lijst:", df['id'].tolist())
-            selected_row = df[df['id'] == selected_app_id].iloc[0]
-            
-            st.markdown(f"""
-            <div style="background-color: #ffffff; padding: 20px; border-radius: 10px; color: #0f172a; margin-bottom: 20px;">
-                <b>Geselecteerde Aanvraag #{selected_row['id']}</b><br>
-                <b>Naam:</b> {selected_row['full_name']} | <b>ID-Nr:</b> {selected_row['id_number']}<br>
-                <b>Telefoon:</b> {selected_row['phone_number']} | <b>E-mail:</b> {selected_row['email']}<br>
-                <b>Huidige Status:</b> <span style="color: #1b5e20; font-weight: bold;">{selected_row['status']}</span>
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Documenten downloaden & automatisch verwijderen uit database
-            st.markdown("<b>📁 Geüploade Bestanden (Download verwijdert het bestand automatisch uit de database/server):</b>", unsafe_allow_html=True)
-            
-            files_dict = {
-                "Uitreksel": selected_row['uitreksel_file'],
-                "Pasfoto": selected_row['pasfoto_file'],
-                "ID-Kaart": selected_row['id_kaart_file'],
-                "Bankbewijs": selected_row['bankbewijs_file']
-            }
-
-            col_d1, col_d2, col_d3, col_d4 = st.columns(4)
-            cols = [col_d1, col_d2, col_d3, col_d4]
-
-            for idx, (label, fname) in enumerate(files_dict.items()):
-                with cols[idx]:
-                    if fname:
-                        fpath = os.path.join(UPLOAD_DIR, fname)
-                        if os.path.exists(fpath):
-                            with open(fpath, "rb") as f:
-                                file_bytes = f.read()
-                            
-                            if st.download_button(label=f"📥 Download {label}", data=file_bytes, file_name=fname, key=f"dl_{selected_app_id}_{label}"):
-                                conn = sqlite3.connect('wanica.db')
-                                cursor = conn.cursor()
-                                col_map = {
-                                    "Uitreksel": "uitreksel_file",
-                                    "Pasfoto": "pasfoto_file",
-                                    "ID-Kaart": "id_kaart_file",
-                                    "Bankbewijs": "bankbewijs_file"
-                                }
-                                cursor.execute(f"UPDATE applications SET {col_map[label]} = NULL WHERE id = ?", (selected_app_id,))
-                                conn.commit()
-                                conn.close()
-                                
-                                try:
-                                    os.remove(fpath)
-                                except OSError:
-                                    pass
-                                
-                                st.success(f"{label} gedownload en automatisch uit het systeem verwijderd!")
-                                st.rerun()
-                        else:
-                            st.caption(f"❌ {label}: Reeds gedownload / verwijderd")
-                    else:
-                        st.caption(f"⚠️ {label}: Niet beschikbaar")
-
-            st.markdown("<br>", unsafe_allow_html=True)
-
-            with st.form("manage_form"):
-                new_status = st.selectbox("Status aanpassen", ["In behandeling", "Goedgekeurd", "Afgekeurd"], index=["In behandeling", "Goedgekeurd", "Afgekeurd"].index(selected_row['status']))
-                
-                col_btn1, col_btn2 = st.columns(2)
-                with col_btn1:
-                    update_submitted = st.form_submit_button("💾 Status Bijwerken")
-                with col_btn2:
-                    delete_submitted = st.form_submit_button("🗑️ Volledige Aanvraag Verwijderen")
-
-                if update_submitted:
-                    conn = sqlite3.connect('wanica.db')
-                    cursor = conn.cursor()
-                    cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (new_status, selected_app_id))
-                    conn.commit()
-                    cursor.close()
-                    conn.close()
-                    st.success(f"Status voor ID #{selected_app_id} bijgewerkt naar '{new_status}'!")
-                    st.rerun()
-
-                if delete_submitted:
-                    conn = sqlite3.connect('wanica.db')
-                    cursor = conn.cursor()
-                    for f in [selected_row['uitreksel_file'], selected_row['pasfoto_file'], selected_row['id_kaart_file'], selected_row['bankbewijs_file']]:
-                        if f:
-                            fp = os.path.join(UPLOAD_DIR, f)
-                            if os.path.exists(fp):
-                                try:
-                                    os.remove(fp)
-                                except OSError:
-                                    pass
-                    cursor.execute("DELETE FROM applications WHERE id = ?", (selected_app_id,))
-                    conn.commit()
-                    cursor.close()
-                    conn.close()
-                    st.warning(f"Aanvraag #{selected_app_id} en alle bijbehorende bestanden zijn volledig verwijderd!")
-                    st.rerun()
-        else:
-            st.info("Geen aanvragen gevonden in het systeem.")
+            <div style="background-color: #ffffff; padding: 25px; border-radius: 14px; box-shadow: 0
