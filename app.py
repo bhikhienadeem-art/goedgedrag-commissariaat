@@ -62,10 +62,10 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Functie om automatisch e-mail te sturen vanuit ggdaanvraag@gmail.com
+# Functie om automatisch e-mail te sturen via SSL (poort 465)
 def send_confirmation_email(to_email, full_name, phone_number):
     sender_email = "ggdaanvraag@gmail.com"
-    app_password = "fznempnohdqdlwcr" # Inclusief ingevuld Google App-Password (spaties mogen weggelaten worden)
+    app_password = "fznempnohdqdlwcr" # Jouw Google App-Password
     
     subject = "Bevestiging Aanvraag Verklaring Omtrent het Gedrag - Wanica Centrum"
     
@@ -89,16 +89,17 @@ Tel: +597-366660 / +597-366929
     msg.attach(MIMEText(body, 'plain'))
 
     try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
+        # Gebruik SMTP_SSL op poort 465 voor stabiele verbinding met Gmail
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.login(sender_email, app_password)
         server.sendmail(sender_email, to_email, msg.as_string())
         server.quit()
         return True
     except Exception as e:
+        print(f"Fout bij verzenden e-mail: {e}")
         return False
 
-# Custom CSS for High Contrast and Clean Containers
+# Custom CSS with Absolute Readability for Uploaders and Forms
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -357,7 +358,7 @@ if menu == "Aanvraag Indienen (Burgers)":
                 conn.commit()
                 conn.close()
 
-                # Automatisch e-mail versturen via ggdaanvraag@gmail.com
+                # Verstuur e-mail via SSL
                 email_sent = send_confirmation_email(email, full_name, phone_number)
 
                 st.session_state['last_submission'] = {
