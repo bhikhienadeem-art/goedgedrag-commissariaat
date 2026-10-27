@@ -51,7 +51,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS to completely fix dark theme contrast issues in Streamlit
+# Custom CSS with Larger Header Logo and Larger Contact Info
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -72,47 +72,51 @@ def add_custom_css():
             {bg_css}
         }}
         
-        /* Modern Header Layout */
+        /* Modern Header Layout with Larger, Prominent Elements */
         .custom-header {{
             background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
-            border-bottom: 5px solid #144517;
-            padding: 22px 30px;
-            border-radius: 14px;
+            border-bottom: 6px solid #144517;
+            padding: 28px 35px;
+            border-radius: 16px;
             color: #ffffff;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.45);
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 25px;
         }}
         .header-brand {{
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 24px;
         }}
         .header-title h1 {{
             margin: 0;
-            font-size: 25px;
+            font-size: 28px;
             color: #ffffff !important;
             font-weight: 800;
+            letter-spacing: 0.3px;
         }}
         .header-title p {{
-            margin: 4px 0 0 0;
-            font-size: 15px;
+            margin: 6px 0 0 0;
+            font-size: 16px;
             color: #e2e8f0 !important;
             font-weight: 600;
         }}
+        /* BIGGER AND CLEARER CONTACT INFO */
         .header-contact {{
-            font-size: 13.5px;
+            font-size: 16px;
             text-align: right;
-            line-height: 1.7;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 10px 16px;
-            border-radius: 10px;
+            line-height: 1.8;
+            background: rgba(255, 255, 255, 0.18);
+            padding: 14px 22px;
+            border-radius: 12px;
             color: #ffffff !important;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }}
 
         /* SOLID WHITE CONTAINER FOR FORM */
@@ -211,14 +215,14 @@ def add_custom_css():
 
 add_custom_css()
 
-# Header HTML with LARGER LOGO
+# Header HTML with MUCH LARGER LOGO (135px) and Prominent Contact Info
 logo_path = "logo.png"
 logo_html = ""
 
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as f:
         encoded_logo = base64.b64encode(f.read()).decode()
-    logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="height: 110px; width: auto; background: #ffffff; padding: 6px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">'
+    logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="height: 135px; width: auto; background: #ffffff; padding: 8px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.35);">'
 
 st.markdown(f"""
 <div class="custom-header">
@@ -339,7 +343,7 @@ else:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (new_status, app_id))
                     conn.commit()
-                    conn.close()
+                    cursor.close()
                     st.success(f"Status voor ID #{app_id} bijgewerkt!")
                     st.rerun()
 
@@ -350,7 +354,7 @@ else:
                     cursor = conn.cursor()
                     cursor.execute("DELETE FROM applications WHERE id = ?", (app_id,))
                     conn.commit()
-                    conn.close()
+                    cursor.close()
                     st.warning(f"Aanvraag #{app_id} verwijderd!")
                     st.rerun()
         else:
