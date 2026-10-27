@@ -51,7 +51,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS for Perfect Contrast, Clean Font, and No Ghost White Box
+# Custom CSS for Maximum Readability and High Contrast
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -59,7 +59,7 @@ def add_custom_css():
         with open(bg_image_path, "rb") as f:
             encoded_bg = base64.b64encode(f.read()).decode()
         bg_css = f"""
-            background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url("data:image/jpg;base64,{encoded_bg}") no-repeat center center fixed;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("data:image/jpg;base64,{encoded_bg}") no-repeat center center fixed;
             background-size: cover;
         """
 
@@ -68,7 +68,7 @@ def add_custom_css():
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
 
         html, body, [class*="css"], .stApp {{
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
             {bg_css}
         }}
         
@@ -97,7 +97,6 @@ def add_custom_css():
             font-size: 25px;
             color: #ffffff !important;
             font-weight: 800;
-            letter-spacing: 0.3px;
         }}
         .header-title p {{
             margin: 4px 0 0 0;
@@ -116,64 +115,56 @@ def add_custom_css():
             border: 1px solid rgba(255, 255, 255, 0.3);
         }}
 
-        /* SOLID OPAQUE WHITE CONTAINER FOR FORM */
+        /* SOLID WHITE CONTAINER FOR FORM */
         div[data-testid="stForm"] {{
             background-color: #ffffff !important;
-            padding: 35px !important;
+            padding: 40px !important;
             border-radius: 16px !important;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.45) !important;
-            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5) !important;
+            border: 1px solid #cbd5e1 !important;
         }}
         
         /* Form Section Headers */
         .section-header {{
             background-color: #e8f5e9;
-            border-left: 5px solid #2e7d32;
+            border-left: 6px solid #2e7d32;
             padding: 12px 18px;
             font-size: 16px;
             font-weight: 800;
             color: #1b5e20 !important;
             border-radius: 0 8px 8px 0;
-            margin: 22px 0 18px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin: 25px 0 18px 0;
         }}
 
-        /* HIGH-CONTRAST LABELS & INPUTS */
-        .stMarkdown, .stMarkdown p, h1, h2, h3, h4, span {{
-            color: #ffffff;
-        }}
-
-        div[data-testid="stForm"] .stMarkdown p, div[data-testid="stForm"] h1, div[data-testid="stForm"] h2, div[data-testid="stForm"] h3 {{
-            color: #0f172a !important;
-        }}
-
-        label, div[data-testid="stWidgetLabel"] p {{
+        /* CRITICAL: FORCE ALL LABELS INSIDE FORM TO BE DARK & BOLD */
+        div[data-testid="stForm"] label, 
+        div[data-testid="stForm"] div[data-testid="stWidgetLabel"] p,
+        div[data-testid="stForm"] span {{
             color: #0f172a !important;
             font-weight: 700 !important;
-            font-size: 14.5px !important;
+            font-size: 15px !important;
         }}
 
+        /* Text Input Styling */
         .stTextInput input {{
-            background-color: #ffffff !important;
+            background-color: #f8fafc !important;
             color: #0f172a !important;
-            border: 2px solid #94a3b8 !important;
+            border: 2px solid #64748b !important;
             border-radius: 8px !important;
-            padding: 11px 14px !important;
+            padding: 12px 15px !important;
             font-size: 15px !important;
-            font-weight: 500 !important;
+            font-weight: 600 !important;
         }}
 
         .stTextInput input:focus {{
             border-color: #2e7d32 !important;
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2) !important;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.25) !important;
         }}
 
-        /* File Upload Helper Box */
+        /* File Upload Box */
         .stFileUploader {{
             background-color: #f8fafc;
-            border: 2px dashed #94a3b8;
+            border: 2px dashed #64748b;
             padding: 14px;
             border-radius: 10px;
         }}
@@ -188,6 +179,7 @@ def add_custom_css():
             border-radius: 10px !important;
             border: none !important;
             box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4) !important;
+            width: 100%;
         }}
 
         div.stButton > button:hover {{
@@ -254,7 +246,7 @@ if menu == "Aanvraag Indienen (Burgers)":
             bankbewijs = st.file_uploader("Bewijs van Bankovermaking *", type=['pdf', 'jpg', 'jpeg', 'png'], help="Betalingsbewijs van de leges")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        submitted = st.form_submit_button("🚀 Aanvraag Definitief Indienen", use_container_width=True)
+        submitted = st.form_submit_button("🚀 Aanvraag Definitief Indienen")
 
         if submitted:
             if not (full_name and id_number and phone_number and email and uitreksel and pasfoto and id_kaart and bankbewijs):
@@ -326,9 +318,9 @@ else:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (new_status, app_id))
                     conn.commit()
-                    conn.close()
+                    cursor.close()
                     st.success(f"Status voor ID #{app_id} bijgewerkt!")
-                    st.rerun()
+                    st.rer.run()
 
             with col_del:
                 st.write("Verwijderen")
@@ -337,7 +329,7 @@ else:
                     cursor = conn.cursor()
                     cursor.execute("DELETE FROM applications WHERE id = ?", (app_id,))
                     conn.commit()
-                    conn.close()
+                    cursor.close()
                     st.warning(f"Aanvraag #{app_id} verwijderd!")
                     st.rerun()
         else:
