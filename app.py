@@ -332,7 +332,8 @@ else:
             login_submitted = st.form_submit_button("🔑 Inloggen")
             
             if login_submitted:
-                if user == "admin" and pwd == "admin":
+                # Gecorrigeerd naar admin@123
+                if user == "admin" and pwd == "admin@123":
                     st.session_state['logged_in'] = True
                     st.session_state['username'] = user
                     st.rerun()
