@@ -51,7 +51,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS for Background & Header
+# Custom CSS for Background & Card Styling
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -81,6 +81,8 @@ def add_custom_css():
             align-items: center;
             margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            flex-wrap: wrap;
+            gap: 15px;
         }}
         .header-title h1 {{
             margin: 0;
@@ -99,25 +101,43 @@ def add_custom_css():
             line-height: 1.6;
         }}
 
-        /* Card Container */
+        /* White Card Container for content visibility */
         .main-card {{
             background-color: rgba(255, 255, 255, 0.96);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             margin-bottom: 30px;
+            color: #2d3748;
+        }}
+        
+        /* Form Labels */
+        .stTextInput label, .stFileUploader label, .stSelectbox label {{
+            color: #2d3748 !important;
+            font-weight: 600 !important;
         }}
     </style>
     """, unsafe_allow_html=True)
 
 add_custom_css()
 
-# Header HTML
-st.markdown("""
+# Header HTML with Logo Base64 encoding
+logo_path = "logo.png"
+logo_html = ""
+
+if os.path.exists(logo_path):
+    with open(logo_path, "rb") as f:
+        encoded_logo = base64.b64encode(f.read()).decode()
+    logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="height: 75px; width: auto; background: white; padding: 4px; border-radius: 8px; margin-right: 20px;">'
+
+st.markdown(f"""
 <div class="custom-header">
-    <div class="header-title">
-        <h1>Districtscommissariaat Wanica Centrum</h1>
-        <p>Online Diensten Portaal</p>
+    <div style="display: flex; align-items: center;">
+        {logo_html}
+        <div class="header-title">
+            <h1>Districtscommissariaat Wanica Centrum</h1>
+            <p>Online Diensten Portaal</p>
+        </div>
     </div>
     <div class="header-contact">
         📍 <b>Adres:</b> Tawajarieweg No. 20<br>
@@ -194,7 +214,7 @@ else:
         user = st.text_input("Gebruikersnaam")
         pwd = st.text_input("Wachtwoord", type="password")
         if st.button("Inloggen"):
-            if user == "admin" and pwd == "admin":  # Wachtwoord instellen
+            if user == "admin" and pwd == "admin":  # Beheerderswachtwoord
                 st.session_state['logged_in'] = True
                 st.session_state['username'] = user
                 st.rerun()
@@ -214,35 +234,4 @@ else:
 
         st.markdown("### 📋 Binnengekomen Aanvragen")
         if not df.empty:
-            st.dataframe(df, use_container_width=True)
-
-            st.markdown("---")
-            st.markdown("### ⚙️ Beheer Aanvraag")
-            app_id = st.selectbox("Selecteer Aanvraag ID", df['id'].tolist())
-
-            col_status, col_del = st.columns(2)
-            with col_status:
-                new_status = st.selectbox("Status aanpassen", ["In behandeling", "Goedgekeurd", "Afgekeurd"])
-                if st.button("Status Update"):
-                    conn = sqlite3.connect('wanica.db')
-                    cursor = conn.cursor()
-                    cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (new_status, app_id))
-                    conn.commit()
-                    conn.close()
-                    st.success(f"Status voor ID #{app_id} bijgewerkt!")
-                    st.rerun()
-
-            with col_del:
-                st.write("Verwijderen")
-                if st.button("🗑️ Aanvraag Verwijderen", type="primary"):
-                    conn = sqlite3.connect('wanica.db')
-                    cursor = conn.cursor()
-                    cursor.execute("DELETE FROM applications WHERE id = ?", (app_id,))
-                    conn.commit()
-                    conn.close()
-                    st.warning(f"Aanvraag #{app_id} verwijderd!")
-                    st.rerun()
-        else:
-            st.info("Geen aanvragen gevonden.")
-
-    st.markdown('</div>', unsafe_allow_html=True)
+            st.dataframe(df, use_container
