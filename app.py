@@ -51,7 +51,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS for Maximum Readability and High Contrast
+# Custom CSS to completely fix dark theme contrast issues in Streamlit
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -59,7 +59,7 @@ def add_custom_css():
         with open(bg_image_path, "rb") as f:
             encoded_bg = base64.b64encode(f.read()).decode()
         bg_css = f"""
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("data:image/jpg;base64,{encoded_bg}") no-repeat center center fixed;
+            background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url("data:image/jpg;base64,{encoded_bg}") no-repeat center center fixed;
             background-size: cover;
         """
 
@@ -136,10 +136,11 @@ def add_custom_css():
             margin: 25px 0 18px 0;
         }}
 
-        /* CRITICAL: FORCE ALL LABELS INSIDE FORM TO BE DARK & BOLD */
+        /* FORCE ALL LABELS INSIDE FORM TO BE DARK & BOLD */
         div[data-testid="stForm"] label, 
         div[data-testid="stForm"] div[data-testid="stWidgetLabel"] p,
-        div[data-testid="stForm"] span {{
+        div[data-testid="stForm"] span,
+        div[data-testid="stForm"] small {{
             color: #0f172a !important;
             font-weight: 700 !important;
             font-size: 15px !important;
@@ -147,7 +148,7 @@ def add_custom_css():
 
         /* Text Input Styling */
         .stTextInput input {{
-            background-color: #f8fafc !important;
+            background-color: #ffffff !important;
             color: #0f172a !important;
             border: 2px solid #64748b !important;
             border-radius: 8px !important;
@@ -156,34 +157,54 @@ def add_custom_css():
             font-weight: 600 !important;
         }}
 
-        .stTextInput input:focus {{
-            border-color: #2e7d32 !important;
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.25) !important;
+        /* FILE UPLOADER VISIBILITY FIX */
+        [data-testid="stFileUploader"] {{
+            background-color: #f1f5f9 !important;
+            border: 2px dashed #475569 !important;
+            border-radius: 12px !important;
+            padding: 16px !important;
+        }}
+        [data-testid="stFileUploaderDropzone"] {{
+            background-color: #ffffff !important;
+            border: 1.5px solid #cbd5e1 !important;
+        }}
+        [data-testid="stFileUploaderDropzone"] * {{
+            color: #0f172a !important;
+            fill: #0f172a !important;
+        }}
+        [data-testid="stFileUploaderDropzone"] button {{
+            background-color: #1b5e20 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 700 !important;
+        }}
+        [data-testid="stFileUploaderDropzone"] button * {{
+            color: #ffffff !important;
+            fill: #ffffff !important;
+        }}
+        [data-testid="stFileUploaderDropzoneInstructions"] span {{
+            color: #0f172a !important;
+            font-weight: 700 !important;
         }}
 
-        /* File Upload Box */
-        .stFileUploader {{
-            background-color: #f8fafc;
-            border: 2px dashed #64748b;
-            padding: 14px;
-            border-radius: 10px;
-        }}
-
-        /* Submit Button Styling */
-        div.stButton > button {{
-            background-color: #2e7d32 !important;
+        /* SUBMIT BUTTON VISIBILITY FIX */
+        div.stButton > button, div[data-testid="stFormSubmitButton"] > button {{
+            background-color: #1b5e20 !important;
             color: #ffffff !important;
             font-weight: 800 !important;
-            font-size: 16.5px !important;
-            padding: 14px 28px !important;
+            font-size: 18px !important;
+            padding: 16px 30px !important;
             border-radius: 10px !important;
             border: none !important;
-            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4) !important;
-            width: 100%;
+            box-shadow: 0 5px 15px rgba(27, 94, 32, 0.4) !important;
+            width: 100% !important;
         }}
-
-        div.stButton > button:hover {{
-            background-color: #1b5e20 !important;
+        div.stButton > button *, div[data-testid="stFormSubmitButton"] > button * {{
+            color: #ffffff !important;
+        }}
+        div.stButton > button:hover, div[data-testid="stFormSubmitButton"] > button:hover {{
+            background-color: #2e7d32 !important;
         }}
     </style>
     """, unsafe_allow_html=True)
@@ -318,9 +339,9 @@ else:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (new_status, app_id))
                     conn.commit()
-                    cursor.close()
+                    conn.close()
                     st.success(f"Status voor ID #{app_id} bijgewerkt!")
-                    st.rer.run()
+                    st.rerun()
 
             with col_del:
                 st.write("Verwijderen")
@@ -329,7 +350,7 @@ else:
                     cursor = conn.cursor()
                     cursor.execute("DELETE FROM applications WHERE id = ?", (app_id,))
                     conn.commit()
-                    cursor.close()
+                    conn.close()
                     st.warning(f"Aanvraag #{app_id} verwijderd!")
                     st.rerun()
         else:
