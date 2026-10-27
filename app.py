@@ -4,6 +4,9 @@ import os
 import hashlib
 import pandas as pd
 import base64
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Page configuration
 st.set_page_config(
@@ -59,7 +62,43 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS with Absolute Readability for Uploaders and Forms
+# Functie om automatisch e-mail te sturen vanuit ggdaanvraag@gmail.com
+def send_confirmation_email(to_email, full_name, phone_number):
+    sender_email = "ggdaanvraag@gmail.com"
+    app_password = "fznempnohdqdlwcr" # Inclusief ingevuld Google App-Password (spaties mogen weggelaten worden)
+    
+    subject = "Bevestiging Aanvraag Verklaring Omtrent het Gedrag - Wanica Centrum"
+    
+    body = f"""Beste {full_name},
+
+Hartelijk dank voor uw aanvraag voor een Verklaring Omtrent het Gedrag (Goedgedrag) bij het Districtscommissariaat Wanica Centrum.
+
+Wij hebben uw aanvraag en alle benodigde documenten in goede orde ontvangen en in behandeling genomen. 
+Zodra uw aanvraag is beoordeeld, nemen wij contact met u op via dit e-mailadres of via uw telefoonnummer ({phone_number}).
+
+Met vriendelijke groet,
+Districtscommissariaat Wanica Centrum
+Adres: Tawajarieweg No. 20
+Tel: +597-366660 / +597-366929
+"""
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, app_password)
+        server.sendmail(sender_email, to_email, msg.as_string())
+        server.quit()
+        return True
+    except Exception as e:
+        return False
+
+# Custom CSS for High Contrast and Clean Containers
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -184,7 +223,7 @@ def add_custom_css():
             font-weight: 600 !important;
         }}
 
-        /* ABSOLUTE READABILITY FIX FOR FILE UPLOADER */
+        /* READABILITY FIX FOR FILE UPLOADER */
         [data-testid="stFileUploader"] {{
             background-color: #f8fafc !important;
             border: 2px dashed #cbd5e1 !important;
@@ -318,16 +357,39 @@ if menu == "Aanvraag Indienen (Burgers)":
                 conn.commit()
                 conn.close()
 
-                st.success("✅ Uw aanvraag is succesvol ingediend!")
-                st.markdown(f"""
-                <div style="background-color: #f8fafc; border: 2px solid #2e7d32; padding: 20px; border-radius: 12px; color: #0f172a; margin-top: 20px;">
-                    <h4 style="color: #1b5e20; margin-top: 0;">✉️ Bevestigingsmail verzonden naar: {email}</h4>
-                    <p>Beste <b>{full_name}</b>,</p>
-                    <p>Hartelijk dank voor uw aanvraag voor een <b>Verklaring Omtrent het Gedrag (Goedgedrag)</b> bij het Districtscommissariaat Wanica Centrum.</p>
-                    <p>Wij hebben uw aanvraag in goede orde ontvangen en in behandeling genomen. Zodra uw aanvraag is beoordeeld, nemen wij contact met u op via dit e-mailadres of uw telefoonnummer ({phone_number}).</p>
-                    <p style="margin-bottom: 0;">Met vriendelijke groet,<br><b>Districtscommissariaat Wanica Centrum</b></p>
-                </div>
-                """, unsafe_allow_html=True)
+                # Automatisch e-mail versturen via ggdaanvraag@gmail.com
+                email_sent = send_confirmation_email(email, full_name, phone_number)
+
+                st.session_state['last_submission'] = {
+                    "full_name": full_name,
+                    "email": email,
+                    "phone_number": phone_number,
+                    "email_sent": email_sent
+                }
+                st.rerun()
+
+    if 'last_submission' in st.session_state:
+        sub = st.session_state['last_submission']
+        st.success("✅ Uw aanvraag is succesvol ingediend!")
+        
+        email_status_text = f"✉️ Een officiële bevestigingsmail is succesvol verzonden vanuit <b>ggdaanvraag@gmail.com</b> naar <b>{sub['email']}</b>." if sub['email_sent'] else "⚠️ Aanvraag is opgeslagen, maar e-mail kon niet worden verzonden. Controleer de internetverbinding."
+
+        st.markdown(f"""
+        <div style="background-color: #ffffff; border: 3px solid #2e7d32; padding: 25px; border-radius: 14px; color: #0f172a; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h3 style="color: #1b5e20; margin-top: 0;">{email_status_text}</h3>
+            <p>Beste <b>{sub['full_name']}</b>,</p>
+            <p>Hartelijk dank voor uw aanvraag voor een <b>Verklaring Omtrent het Gedrag (Goedgedrag)</b> bij het Districtscommissariaat Wanica Centrum.</p>
+            <p>Wij hebben uw aanvraag en documenten in goede orde ontvangen en in behandeling genomen. Zodra uw aanvraag is beoordeeld, nemen wij contact met u op via dit e-mailadres of via uw telefoonnummer ({sub['phone_number']}).</p>
+            <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 15px 0;">
+            <p style="margin-bottom: 0; font-size: 14px; color: #475569;">
+                <b>Districtscommissariaat Wanica Centrum</b><br>
+                Adres: Tawajarieweg No. 20 | Tel: +597-366660 / +597-366929
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Nieuwe aanvraag indienen"):
+            del st.session_state['last_submission']
+            st.rerun()
 
 # ---------------------------------------------------------
 # MEDEWERKERS DASHBOARD
