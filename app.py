@@ -51,7 +51,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS with Larger Header Logo and Larger Contact Info
+# Custom CSS with Clean White Card Container for Login & Forms
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -105,7 +105,6 @@ def add_custom_css():
             color: #e2e8f0 !important;
             font-weight: 600;
         }}
-        /* BIGGER AND CLEARER CONTACT INFO */
         .header-contact {{
             font-size: 16px;
             text-align: right;
@@ -140,11 +139,12 @@ def add_custom_css():
             margin: 25px 0 18px 0;
         }}
 
-        /* FORCE ALL LABELS INSIDE FORM TO BE DARK & BOLD */
+        /* FORCE ALL LABELS INSIDE FORMS TO BE DARK & BOLD */
         div[data-testid="stForm"] label, 
         div[data-testid="stForm"] div[data-testid="stWidgetLabel"] p,
         div[data-testid="stForm"] span,
-        div[data-testid="stForm"] small {{
+        div[data-testid="stForm"] small,
+        label, div[data-testid="stWidgetLabel"] p {{
             color: #0f172a !important;
             font-weight: 700 !important;
             font-size: 15px !important;
@@ -310,18 +310,23 @@ else:
         st.session_state['logged_in'] = False
 
     if not st.session_state['logged_in']:
-        st.markdown('<div class="section-header">Inloggen met Beheerdersaccount</div>', unsafe_allow_html=True)
-        user = st.text_input("Gebruikersnaam", key="login_user")
-        pwd = st.text_input("Wachtwoord", type="password", key="login_pwd")
-        
-        if st.button("🔑 Inloggen", use_container_width=True):
-            if user == "admin" and pwd == "admin":
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = user
-                st.rerun()
-            else:
-                st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
+        # Wrapped inside a clean white st.form container for consistent layout
+        with st.form("login_form"):
+            st.markdown('<div class="section-header">Inloggen met Beheerdersaccount</div>', unsafe_allow_html=True)
+            user = st.text_input("Gebruikersnaam", placeholder="Voer gebruikersnaam in")
+            pwd = st.text_input("Wachtwoord", type="password", placeholder="Voer wachtwoord in")
+            login_submitted = st.form_submit_button("🔑 Inloggen")
+            
+            if login_submitted:
+                if user == "admin" and pwd == "admin":
+                    st.session_state['logged_in'] = True
+                    st.session_state['username'] = user
+                    st.rerun()
+                else:
+                    st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
     else:
+        # Wrap dashboard inside a white card container for high contrast
+        st.markdown('<div style="background-color: #ffffff; padding: 35px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); color: #0f172a;">', unsafe_allow_html=True)
         st.write(f"👋 Ingelogd als: **{st.session_state['username']}**")
         if st.button("Uitloggen"):
             st.session_state['logged_in'] = False
@@ -365,3 +370,4 @@ else:
                     st.rerun()
         else:
             st.info("Geen aanvragen gevonden.")
+        st.markdown('</div>', unsafe_allow_html=True)
