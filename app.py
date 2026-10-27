@@ -51,7 +51,7 @@ def save_file(uploaded_file):
         return new_name
     return None
 
-# Custom CSS with High Contrast for Sidebar and Forms
+# Custom CSS for High Contrast and Clean Containers
 def add_custom_css():
     bg_image_path = "achtergrond.jpg"
     bg_css = ""
@@ -332,7 +332,6 @@ else:
             login_submitted = st.form_submit_button("🔑 Inloggen")
             
             if login_submitted:
-                # Gecorrigeerd naar admin@123
                 if user == "admin" and pwd == "admin@123":
                     st.session_state['logged_in'] = True
                     st.session_state['username'] = user
@@ -340,11 +339,14 @@ else:
                 else:
                     st.error("❌ Ongeldige gebruikersnaam of wachtwoord.")
     else:
-        st.markdown('<div style="background-color: #ffffff; padding: 35px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); color: #0f172a;">', unsafe_allow_html=True)
-        st.write(f"👋 Ingelogd als: **{st.session_state['username']}**")
-        if st.button("Uitloggen"):
-            st.session_state['logged_in'] = False
-            st.rerun()
+        # GEEN lege witte container meer, maar direct nette weergave op de achtergrond
+        col_user, col_logout = st.columns([4, 1])
+        with col_user:
+            st.markdown("<h3 style='color: #ffffff; margin-top: 10px;'>👋 Welkom, Ingelogd als: admin</h3>", unsafe_allow_html=True)
+        with col_logout:
+            if st.button("🚪 Uitloggen", use_container_width=True):
+                st.session_state['logged_in'] = False
+                st.rerun()
 
         st.divider()
 
@@ -352,36 +354,42 @@ else:
         df = pd.read_sql_query("SELECT id, full_name, id_number, phone_number, email, status, created_at FROM applications ORDER BY id DESC", conn)
         conn.close()
 
-        st.markdown("### 📋 Binnengekomen Aanvragen")
+        st.markdown("<h3 style='color: #ffffff;'>📋 Binnengekomen Aanvragen</h3>", unsafe_allow_html=True)
         if not df.empty:
             st.dataframe(df, use_container_width=True)
 
             st.markdown("---")
-            st.markdown("### ⚙️ Beheer Aanvraag")
-            app_id = st.selectbox("Selecteer Aanvraag ID", df['id'].tolist())
-
-            col_status, col_del = st.columns(2)
-            with col_status:
+            st.markdown("<h3 style='color: #ffffff;'>⚙️ Beheer Aanvraag</h3>", unsafe_allow_html=True)
+            
+            # Witte sub-container voor beheer opties zodat het netjes leesbaar is
+            with st.form("manage_form"):
+                app_id = st.selectbox("Selecteer Aanvraag ID", df['id'].tolist())
                 new_status = st.selectbox("Status aanpassen", ["In behandeling", "Goedgekeurd", "Afgekeurd"])
-                if st.button("Status Update"):
+                
+                col_btn1, col_btn2 = st.columns(2)
+                with col_btn1:
+                    update_submitted = st.form_submit_button("💾 Status Update")
+                with col_btn2:
+                    delete_submitted = st.form_submit_button("🗑️ Aanvraag Verwijderen")
+
+                if update_submitted:
                     conn = sqlite3.connect('wanica.db')
                     cursor = conn.cursor()
                     cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (new_status, app_id))
                     conn.commit()
                     cursor.close()
+                    conn.close()
                     st.success(f"Status voor ID #{app_id} bijgewerkt!")
                     st.rerun()
 
-            with col_del:
-                st.write("Verwijderen")
-                if st.button("🗑️ Aanvraag Verwijderen", type="primary"):
+                if delete_submitted:
                     conn = sqlite3.connect('wanica.db')
                     cursor = conn.cursor()
                     cursor.execute("DELETE FROM applications WHERE id = ?", (app_id,))
                     conn.commit()
                     cursor.close()
+                    conn.close()
                     st.warning(f"Aanvraag #{app_id} verwijderd!")
                     st.rerun()
         else:
             st.info("Geen aanvragen gevonden.")
-        st.markdown('</div>', unsafe_allow_html=True)
